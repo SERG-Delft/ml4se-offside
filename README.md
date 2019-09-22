@@ -1,7 +1,7 @@
 # ML4SA
 
 ## Description: 
-Replicate the Deep Bugs paper covered in the first lecture and combine it with Code2Vec and explore the benefits of other NN architectures. We plan on picking 2-3 types of bugs and create a model that can indicate how likely a piece of code (single function) is to contain any of those bugs. The bugs we are currently looking at are:
+Replicate the Deep Bugs paper covered in the first lecture and combine it with Code2VecCustomModel and explore the benefits of other NN architectures. We plan on picking 2-3 types of bugs and create a model that can indicate how likely a piece of code (single function) is to contain any of those bugs. The bugs we are currently looking at are:
 
 - Missing (or unnecessary) negation
 - Mixed and/or operators
@@ -23,3 +23,15 @@ The input to the model would be an AST of a single function and the output would
 
 ##Data collection: 
 Use already parsed and validated trees from https://github.com/src-d/awesome-machine-learning-on-source-code#datasets and assume them to contain "correct code". We then generate negative examples by removing, adding or changing respective nodes in the trees.
+
+##Setting up env:
+ 
+ create a new env:
+ 
+ `conda env create -f environment.yml`
+ 
+ update env:
+ 
+  `conda env update --file environment.yml  --prune`
+  
+  No GPU support? Then replace `tensorflow-gpu==2.0.0-rc1` with `tensorflow==2.0.0-rc1`.
