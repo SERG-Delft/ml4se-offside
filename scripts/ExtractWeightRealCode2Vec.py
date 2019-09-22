@@ -1,17 +1,21 @@
-import fnmatch
-from typing import Tuple
-import numpy as np
 import os
-import sys
+from typing import Tuple
+
+import numpy as np
 import tensorflow as tf
 
 from models.Code2VecCustomModel import Code2VecCustomModel
 
 
 def main() -> None:
+    """
+    Reads in the original code2vec weights from the original model dir.
+    Then creates a Code2VecCustomModel and updates the custom model weights based on the original code2vec weights.
+    This model is then saved to disk in the custom model dir such that it can be loaded in the future.
+    """
     dirname = os.path.dirname(__file__)
     ORIGINAL_MODEL_DIR = os.path.join(dirname, "..", "resources", "models", "java14m_trainable")
-    ORIGINAL_MODEL_NAME ="saved_model_iter8"
+    ORIGINAL_MODEL_NAME = "saved_model_iter8"
     CUSTOM_MODEL_DIR = os.path.join(dirname, "..", "resources", "models", "custom", "custom")
     print(ORIGINAL_MODEL_DIR)
     print(CUSTOM_MODEL_DIR)
@@ -21,18 +25,12 @@ def main() -> None:
     model = Code2VecCustomModel()
     model.initialize_variables()
 
-    model.token_embedding_layer.variables[0].assign(word_vocab)
-    model.path_embedding_layer.variables[0].assign(path_vocab)
-    model.concated_embedding_none_linear_layer.variables[0].assign(transformer)
-    model.context_combiner_layer.variables[0].assign(attention)
+    model.assign_pre_trained_weights(word_vocab, path_vocab, transformer, attention)
 
     model.save_weights(CUSTOM_MODEL_DIR)
 
 
-
-
 def extract_weights_check_points(model_dir: str, model_name: str, debug: bool = False) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-
     with tf.compat.v1.Session() as sess:
         # A MetaGraph contains both a TensorFlow GraphDef
         # as well as associated metadata necessary

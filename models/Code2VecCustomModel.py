@@ -25,14 +25,14 @@ class Code2VecCustomModel(tf.keras.Model):
             **kwargs
     ) -> None:
         super(Code2VecCustomModel, self).__init__(**kwargs)
-        self.token_embedding_layer = tf.keras.layers.Embedding(N_TOKEN_EMBEDDINGS, TOKEN_EMBEDDINGS_SIZE, name="token_embed_layer")
-        self.path_embedding_layer = tf.keras.layers.Embedding(N_PATH_EMBEDDINGS, PATH_EMBEDDINGS_SIZE, name="path_embed_layer")
+        self.token_embedding_layer = tf.keras.layers.Embedding(N_TOKEN_EMBEDDINGS, TOKEN_EMBEDDINGS_SIZE, name="token_embedding_layer")
+        self.path_embedding_layer = tf.keras.layers.Embedding(N_PATH_EMBEDDINGS, PATH_EMBEDDINGS_SIZE, name="path_embedding_layer")
 
         self.concated_embedding_none_linear_layer = tf.keras.layers.Dense(CODE_VECTOR_SIZE, use_bias=False, activation="tanh",
-                                                                          name="flat_embed_layer")
-        self.context_combiner_layer = tf.keras.layers.Dense(1, use_bias=False, activation="linear", name="context_weight_layer")
+                                                                          name="concated_embedding_none_linear_layer")
+        self.context_combiner_layer = tf.keras.layers.Dense(1, use_bias=False, activation="linear", name="context_combiner_layer")
 
-        self.attention_softmax_layer = tf.keras.layers.Softmax(axis=1)
+        self.attention_softmax_layer = tf.keras.layers.Softmax(axis=1, name="attention_softmax_layer")
 
     def call(
             self,
@@ -95,3 +95,14 @@ class Code2VecCustomModel(tf.keras.Model):
         inputs = [path_source_token_idxs, path_idxs, path_target_token_idxs, context_valid_masks]
         self(inputs)
 
+    def assign_pre_trained_weights(
+            self,
+            word_vocab: np.ndarray,
+            path_vocab: np.ndarray,
+            transformer: np.ndarray,
+            attention: np.ndarray,
+    ) -> None:
+        self.token_embedding_layer.variables[0].assign(word_vocab)
+        self.path_embedding_layer.variables[0].assign(path_vocab)
+        self.concated_embedding_none_linear_layer.variables[0].assign(transformer)
+        self.context_combiner_layer.variables[0].assign(attention)

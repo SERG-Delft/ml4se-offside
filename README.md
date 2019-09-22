@@ -35,3 +35,33 @@ Use already parsed and validated trees from https://github.com/src-d/awesome-mac
   `conda env update --file environment.yml  --prune`
   
   No GPU support? Then replace `tensorflow-gpu==2.0.0-rc1` with `tensorflow==2.0.0-rc1`.
+  
+##Extracting custom code2vec model from the original weights:
+Step 1: Download the pre trained model from `https://s3.amazonaws.com/code2vec/model/java14m_model_trainable.tar.gz`.
+Make sure this the trainable model. Then unzip this folder in the resource folder.
+
+Step 2: Run `ExtractWeightRealCode2Vec.py`. This scripts extrat the weights from the original model and transforms them into weights for a `Code2VecCustomModel`.
+
+The custom model can now be used in the any tf graph. 
+
+
+##Setting up the original code2vec project.
+Run the following commands (best done in a venv):
+```
+git clone https://github.com/tech-srl/code2vec
+cd code2vec
+
+pip install -r requirements.txt
+```
+Make sure you have the correct TensorFlow version as specified in the `requirements.txt` file. As newer version do not work.
+
+
+Now you have to download a pretrained model and extract it into `/code2vec/models`. Beaware this must be the trainable model.
+On linux this can be done using:
+```
+wget https://s3.amazonaws.com/code2vec/model/java14m_model_trainable.tar.gz
+tar -xvzf java14m_model_trainable.tar
+```
+
+And finaly you can run the model using:
+`python code2vec.py --load models/java14m_trainable/saved_model_iter8 --predict`
