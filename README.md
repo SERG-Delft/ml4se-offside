@@ -38,7 +38,7 @@ Use already parsed and validated trees from https://github.com/src-d/awesome-mac
   
 ##Extracting custom code2vec model from the original weights:
 Step 1: Download the pre trained model from `https://s3.amazonaws.com/code2vec/model/java14m_model_trainable.tar.gz`.
-Make sure this the trainable model. Then unzip this folder in the resource folder.
+Make sure this the trainable model. Then unzip this folder in the `resources` folder.
 
 Step 2: Run `ExtractWeightRealCode2Vec.py`. This scripts extrat the weights from the original model and transforms them into weights for a `Code2VecCustomModel`.
 
