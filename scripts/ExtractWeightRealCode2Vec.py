@@ -35,10 +35,10 @@ def extract_weights_check_points(model_dir: str, model_name: str, debug: bool = 
         # A MetaGraph contains both a TensorFlow GraphDef
         # as well as associated metadata necessary
         # for running computation in a graph when crossing a process boundary.
-        saver = tf.compat.v1.train.import_meta_graph(f"{model_dir}\\{model_name}.meta")
+        saver = tf.compat.v1.train.import_meta_graph(os.path.join(model_dir, model_name) + ".meta")
 
         # It will get the latest check point in the directory
-        saver.restore(sess, f"{model_dir}\\{model_name}")  # Specific spot
+        saver.restore(sess, os.path.join(model_dir, model_name))  # Specific spot
 
         # Now, let's access and create placeholders variables and
         # create feed-dict to feed new data
