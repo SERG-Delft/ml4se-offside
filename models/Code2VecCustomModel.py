@@ -37,7 +37,7 @@ class Code2VecCustomModel(tf.keras.Model):
 
     #make a prediction
     print(model.predict(inputs)) # this works in both eager and none eager mode.
-    #print(model.predict(inputs)) #This only works in eager mode.
+    #print(model(inputs)) #This only works in eager mode.
     """
     def __init__(
             self,
