@@ -20,11 +20,30 @@ def _assert_shape(x: tf.Tensor, shape: List[int]) -> None:
 
 
 class Code2VecCustomModel(tf.keras.Model):
+    """
+    Example use case of this model.
+    # Create a model
+    model = Code2VecCustomModel()
+    # This load the weights from the original code2vec.
+    # Note that these should be converted first using the ExtractWeightRealCode2Vec.py script.
+    model.load_weights("../resources/models/custom/model")
+
+    # load inputs these are example values.
+    path_source_token_idxs = np.ones(shape=[1, MAX_CONTEXTS, ], dtype=np.int32)  # (batch, max_contexts)
+    path_idxs = np.ones(shape=[1, MAX_CONTEXTS, ], dtype=np.int32)  # (batch, max_contexts)
+    path_target_token_idxs = np.ones(shape=[1, MAX_CONTEXTS, ], dtype=np.int32)  # (batch, max_contexts)
+    context_valid_masks = np.ones(shape=[1, MAX_CONTEXTS, ], dtype=np.float32)  # (batch, max_contexts)
+    inputs = [path_source_token_idxs, path_idxs, path_target_token_idxs, context_valid_masks]
+
+    #make a prediction
+    print(model.predict(inputs)) # this works in both eager and none eager mode.
+    #print(model.predict(inputs)) #This only works in eager mode.
+    """
     def __init__(
             self,
             **kwargs
     ) -> None:
-        super(Code2VecCustomModel, self).__init__(**kwargs)
+        super(Code2VecCustomModel, self).__init__(dynamic=True, **kwargs)
         self.token_embedding_layer = tf.keras.layers.Embedding(N_TOKEN_EMBEDDINGS, TOKEN_EMBEDDINGS_SIZE, name="token_embedding_layer")
         self.path_embedding_layer = tf.keras.layers.Embedding(N_PATH_EMBEDDINGS, PATH_EMBEDDINGS_SIZE, name="path_embedding_layer")
 
@@ -37,9 +56,10 @@ class Code2VecCustomModel(tf.keras.Model):
     def call(
             self,
             inputs: Tuple[GraphInput, GraphInput, GraphInput, GraphInput],
+            training: bool=False,
             **kwargs
     ):
-        training = kwargs["training"] if "training" in kwargs else None
+        #training = kwargs["training"] if "training" in kwargs else None
         path_source_token_idxs, path_idxs, path_target_token_idxs, context_valid_masks = inputs
         batch_size = path_source_token_idxs.shape[0]
         batch_aggregated_context = batch_size * MAX_CONTEXTS if batch_size is not None else None

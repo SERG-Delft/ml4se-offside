@@ -16,7 +16,7 @@ def main() -> None:
     dirname = os.path.dirname(__file__)
     ORIGINAL_MODEL_DIR = os.path.join(dirname, "..", "resources", "models", "java14m_trainable")
     ORIGINAL_MODEL_NAME = "saved_model_iter8"
-    CUSTOM_MODEL_DIR = os.path.join(dirname, "..", "resources", "models", "custom", "custom")
+    CUSTOM_MODEL_DIR = os.path.join(dirname, "..", "resources", "models", "custom", "model")
     print(ORIGINAL_MODEL_DIR)
     print(CUSTOM_MODEL_DIR)
 
