@@ -70,7 +70,9 @@ class Config:
     @classmethod
     def get_vocabularies_path_from_model_path(cls, model_file_path: str) -> str:
         vocabularies_save_file_name = "dictionaries.bin"
-        return '/'.join(model_file_path.split('/')[:-1] + [vocabularies_save_file_name])
+        base_path, _ = os.path.split(model_file_path)
+        return os.path.join(base_path, vocabularies_save_file_name)
+
 
     def get_logger(self) -> logging.Logger:
         if self.__logger is None:
