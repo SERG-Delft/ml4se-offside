@@ -18,8 +18,8 @@ Other considered types of bugs
 
 The input to the model would be an AST of a single function and the output would be the percentage likelihood of each specific bug.
 
-##Sources: 
+## Sources: 
 - Pradel, M., & Sen, K. (2018). DeepBugs: A learning approach to name-based bug detection. Proceedings of the ACM on Programming Languages, 2 (OOPSLA), 147.
 
-##Data collection: 
+## Data collection: 
 Use already parsed and validated trees from https://github.com/src-d/awesome-machine-learning-on-source-code#datasets and assume them to contain "correct code". We then generate negative examples by removing, adding or changing respective nodes in the trees.
