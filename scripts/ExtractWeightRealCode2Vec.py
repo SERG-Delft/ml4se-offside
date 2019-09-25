@@ -4,6 +4,7 @@ from typing import Tuple
 import numpy as np
 import tensorflow as tf
 
+from Config import Config
 from models.Code2VecCustomModel import Code2VecCustomModel
 
 
@@ -13,21 +14,18 @@ def main() -> None:
     Then creates a Code2VecCustomModel and updates the custom model weights based on the original code2vec weights.
     This model is then saved to disk in the custom model dir such that it can be loaded in the future.
     """
-    dirname = os.path.dirname(__file__)
-    ORIGINAL_MODEL_DIR = os.path.join(dirname, "..", "resources", "models", "java14m_trainable")
-    ORIGINAL_MODEL_NAME = "saved_model_iter8"
-    CUSTOM_MODEL_DIR = os.path.join(dirname, "..", "resources", "models", "custom", "model")
-    print(ORIGINAL_MODEL_DIR)
-    print(CUSTOM_MODEL_DIR)
+    config = Config(set_defaults=True)
+    print(config.ORIGINAL_MODEL_DIR)
+    print(config.CUSTOM_MODEL_DIR)
 
-    word_vocab, path_vocab, transformer, attention = extract_weights_check_points(ORIGINAL_MODEL_DIR, ORIGINAL_MODEL_NAME)
+    word_vocab, path_vocab, transformer, attention = extract_weights_check_points(config.ORIGINAL_MODEL_DIR, config.ORIGINAL_MODEL_NAME)
 
-    model = Code2VecCustomModel()
-    model.initialize_variables()
+    model = Code2VecCustomModel(config=config)
+    model.initialize_variables(config=config)
 
     model.assign_pre_trained_weights(word_vocab, path_vocab, transformer, attention)
 
-    model.save_weights(CUSTOM_MODEL_DIR)
+    model.save_weights(config.CUSTOM_MODEL_DIR)
 
 
 def extract_weights_check_points(model_dir: str, model_name: str, debug: bool = False) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:

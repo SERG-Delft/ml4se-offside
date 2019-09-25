@@ -3,8 +3,10 @@ from typing import List, Tuple
 import numpy as np
 import tensorflow as tf
 
+from scripts.PathContextReader import ModelInputTensorsFormer, ReaderInputTensors
 from utils.Types import GraphInput
 
+# TODO Need to pass config into call somehow or make Config.py static so we can remove the ones below
 DROPOUT_KEEP_RATE = 0.75
 N_TOKEN_EMBEDDINGS = 1300853
 N_PATH_EMBEDDINGS = 909711
@@ -41,15 +43,21 @@ class Code2VecCustomModel(tf.keras.Model):
     """
     def __init__(
             self,
+            config,
             **kwargs
     ) -> None:
+        self.config = config
         super(Code2VecCustomModel, self).__init__(dynamic=True, **kwargs)
-        self.token_embedding_layer = tf.keras.layers.Embedding(N_TOKEN_EMBEDDINGS, TOKEN_EMBEDDINGS_SIZE, name="token_embedding_layer")
-        self.path_embedding_layer = tf.keras.layers.Embedding(N_PATH_EMBEDDINGS, PATH_EMBEDDINGS_SIZE, name="path_embedding_layer")
+        self.token_embedding_layer = tf.keras.layers.Embedding(config.N_TOKEN_EMBEDDINGS, config.TOKEN_EMBEDDINGS_SIZE,
+                                                               name="token_embedding_layer")
+        self.path_embedding_layer = tf.keras.layers.Embedding(config.N_PATH_EMBEDDINGS, config.PATH_EMBEDDINGS_SIZE,
+                                                              name="path_embedding_layer")
 
-        self.concated_embedding_none_linear_layer = tf.keras.layers.Dense(CODE_VECTOR_SIZE, use_bias=False, activation="tanh",
+        self.concated_embedding_none_linear_layer = tf.keras.layers.Dense(config.CODE_VECTOR_SIZE, use_bias=False,
+                                                                          activation="tanh",
                                                                           name="concated_embedding_none_linear_layer")
-        self.context_combiner_layer = tf.keras.layers.Dense(1, use_bias=False, activation="linear", name="context_combiner_layer")
+        self.context_combiner_layer = tf.keras.layers.Dense(1, use_bias=False, activation="linear",
+                                                            name="context_combiner_layer")
 
         self.attention_softmax_layer = tf.keras.layers.Softmax(axis=1, name="attention_softmax_layer")
 
@@ -107,11 +115,11 @@ class Code2VecCustomModel(tf.keras.Model):
 
         return code_vectors, attention_weights
 
-    def initialize_variables(self) -> None:
-        path_source_token_idxs = np.ones(shape=[1, MAX_CONTEXTS, ], dtype=np.int32)  # (batch, max_contexts)
-        path_idxs = np.ones(shape=[1, MAX_CONTEXTS, ], dtype=np.int32)  # (batch, max_contexts)
-        path_target_token_idxs = np.ones(shape=[1, MAX_CONTEXTS, ], dtype=np.int32)  # (batch, max_contexts)
-        context_valid_masks = np.ones(shape=[1, MAX_CONTEXTS, ], dtype=np.float32)  # (batch, max_contexts)
+    def initialize_variables(self, config) -> None:
+        path_source_token_idxs = np.ones(shape=[1, config.MAX_CONTEXTS, ], dtype=np.int32)  # (batch, max_contexts)
+        path_idxs = np.ones(shape=[1, config.MAX_CONTEXTS, ], dtype=np.int32)  # (batch, max_contexts)
+        path_target_token_idxs = np.ones(shape=[1, config.MAX_CONTEXTS, ], dtype=np.int32)  # (batch, max_contexts)
+        context_valid_masks = np.ones(shape=[1, config.MAX_CONTEXTS, ], dtype=np.float32)  # (batch, max_contexts)
         inputs = [path_source_token_idxs, path_idxs, path_target_token_idxs, context_valid_masks]
         self(inputs)
 
@@ -126,3 +134,23 @@ class Code2VecCustomModel(tf.keras.Model):
         self.path_embedding_layer.variables[0].assign(path_vocab)
         self.concated_embedding_none_linear_layer.variables[0].assign(transformer)
         self.context_combiner_layer.variables[0].assign(attention)
+
+
+class _TFEvaluateModelInputTensorsFormer(ModelInputTensorsFormer):
+    def to_model_input_form(self, input_tensors: ReaderInputTensors):
+        return input_tensors.target_string, input_tensors.path_source_token_indices, input_tensors.path_indices, \
+               input_tensors.path_target_token_indices, input_tensors.context_valid_mask, \
+               input_tensors.path_source_token_strings, input_tensors.path_strings, \
+               input_tensors.path_target_token_strings
+
+    def from_model_input_form(self, input_row) -> ReaderInputTensors:
+        return ReaderInputTensors(
+            target_string=input_row[0],
+            path_source_token_indices=input_row[1],
+            path_indices=input_row[2],
+            path_target_token_indices=input_row[3],
+            context_valid_mask=input_row[4],
+            path_source_token_strings=input_row[5],
+            path_strings=input_row[6],
+            path_target_token_strings=input_row[7]
+        )
