@@ -73,7 +73,6 @@ class Config:
         base_path, _ = os.path.split(model_file_path)
         return os.path.join(base_path, vocabularies_save_file_name)
 
-
     def get_logger(self) -> logging.Logger:
         if self.__logger is None:
             self.__logger = logging.getLogger('root')

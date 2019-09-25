@@ -38,8 +38,7 @@ class Code2VecCustomModel(tf.keras.Model):
     inputs = [path_source_token_idxs, path_idxs, path_target_token_idxs, context_valid_masks]
 
     #make a prediction
-    print(model.predict(inputs)) # this works in both eager and none eager mode.
-    #print(model(inputs)) #This only works in eager mode.
+    print(model(inputs))
     """
     def __init__(
             self,
@@ -47,7 +46,7 @@ class Code2VecCustomModel(tf.keras.Model):
             **kwargs
     ) -> None:
         self.config = config
-        super(Code2VecCustomModel, self).__init__(dynamic=True, **kwargs)
+        super(Code2VecCustomModel, self).__init__(**kwargs)
         self.token_embedding_layer = tf.keras.layers.Embedding(config.N_TOKEN_EMBEDDINGS, config.TOKEN_EMBEDDINGS_SIZE,
                                                                name="token_embedding_layer")
         self.path_embedding_layer = tf.keras.layers.Embedding(config.N_PATH_EMBEDDINGS, config.PATH_EMBEDDINGS_SIZE,

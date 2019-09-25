@@ -1,10 +1,14 @@
 import numpy as np
+import tensorflow as tf
 
 from Config import Config
 from models.Code2VecCustomModel import Code2VecCustomModel, _TFEvaluateModelInputTensorsFormer
 from scripts.Extractor import Extractor
 from scripts.PathContextReader import PathContextReader
 from utils.Vocabularies import Code2VecVocabs
+
+
+
 
 if __name__ == '__main__':
     config = Config(set_defaults=True)
@@ -23,6 +27,21 @@ if __name__ == '__main__':
     input_filename = 'Input.java'
     config.get_logger().info('Starting interactive prediction...')
     vocabs = Code2VecVocabs(config)
+
+    predict_reader = PathContextReader(vocabs=vocabs,
+                                       model_input_tensors_former=_TFEvaluateModelInputTensorsFormer(),
+                                       config=config)
+
+    @tf.function # With this tf.functionn we stack the other tf.function such that they are combined into a single call graph on the gpu.
+    def predict(line):
+        # Extract numerical form suitable for model
+        reader_output = predict_reader.process_input_row(line)
+        inputs = [reader_output[1], reader_output[2], reader_output[3], tf.cast(reader_output[4], tf.float32)]
+
+
+        return model(inputs)
+
+
     while True:
         print(
             'Modify the file: "%s" and press any key when ready, or "q" / "quit" / "exit" to exit' % input_filename)
@@ -38,12 +57,4 @@ if __name__ == '__main__':
             continue
 
         for line in predict_lines:
-            predict_reader = PathContextReader(vocabs=vocabs,
-                                               model_input_tensors_former=_TFEvaluateModelInputTensorsFormer(),
-                                               config=config)
-            # Extract numerical form suitable for model
-            reader_output = predict_reader.process_input_row(line)
-            inputs = [np.array(reader_output[1]), np.array(reader_output[2]), np.array(reader_output[3]),
-                      np.array(reader_output[4], dtype=np.float32)]
-
-            print(model.predict(inputs))
+            print(predict(line))
