@@ -1,9 +1,11 @@
 from pathlib import Path
 import subprocess
+import random
 
 
 # Looking into file for if/while statements and append negation for entire condition
-def openFileForIfAndWhile(path):
+# SUBJECT FOR DELETION
+def openFileForIfAndWhile2(path):
     subs = [' if ', ' while ']
     with open(path) as file:
         lines = file.readlines()
@@ -28,6 +30,29 @@ def openFileForIfAndWhile(path):
                     lines[index] = savedLine
 
 
+# Looking into function lines for if/while statements and append negation for entire condition
+def openFileForIfAndWhile(lines):
+    subs = [' if ', ' while ']
+    candidateLines = []
+    funcList = [insertExMarkInIfAndWhile, removeExMarkInIfAndWhile]
+    for l in lines:
+        for sub in subs:
+            if (sub in l) and ('!' not in l) and ('&&' not in l) and ('||' not in l):
+                candidateLines.append([lines.index(l), 0, sub])
+            if (sub + '(!' in l) and ('&&' not in l) and ('||' not in l):
+                candidateLines.append([lines.index(l), 1, sub])
+    if len(candidateLines) == 0:
+        return
+    strOrig = "".join(lines)
+    candidate = random.choice(candidateLines)
+    subLinePosition = candidate[0]
+    func = candidate[1]
+    sub = candidate[2]
+    lines[subLinePosition] = funcList[func](lines[subLinePosition], sub)
+    strMut = "".join(lines)
+    return strOrig, [0.01, 0.01, 0.01], strMut, [0.99, 0.01, 0.01]
+
+
 # Inserting negation for entire condition
 def insertExMarkInIfAndWhile(line, sub):
     index = line.find(sub)
@@ -48,7 +73,7 @@ def main():
     for file in javaFiles:
         path = file.absolute().as_posix()
         subprocess.call(['java', '-jar', 'google-java-format-1.7-all-deps.jar', '--replace', path])
-        openFileForIfAndWhile(path)
+        openFileForIfAndWhile2(path)
 
 
 if __name__ == "__main__":
