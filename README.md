@@ -3,7 +3,7 @@
 ## Description: 
 Replicate the Deep Bugs paper covered in the first lecture and combine it with Code2Vec and explore the benefits of other NN architectures. We plan on picking 2-3 types of bugs and create a model that can indicate how likely a piece of code (single function) is to contain any of those bugs. The bugs we are currently looking at are:
 
-- Missing (or unnecessary) negation
+- Missing/unnecessary negation
 - Mixed and/or operators
 - (Mixed <,>,= symbols)
 

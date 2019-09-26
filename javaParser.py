@@ -5,7 +5,6 @@ import subprocess
 # Looking into file for if/while statements and append negation for entire condition
 def openFileForIfAndWhile(path):
     subs = [' if ', ' while ']
-    subprocess.call(['java', '-jar', 'google-java-format-1.7-all-deps.jar', '--replace', path])
     with open(path) as file:
         lines = file.readlines()
         mutCount = 1
@@ -19,7 +18,7 @@ def openFileForIfAndWhile(path):
                         mutation.writelines(lines)
                     mutCount += 1
                     lines[index] = savedLine
-                if (sub + ' (!' in l) and ('&&' not in l) and ('||' not in l):
+                if (sub + '(!' in l) and ('&&' not in l) and ('||' not in l):
                     savedLine = l
                     index = lines.index(l)
                     lines[index] = removeExMarkInIfAndWhile(l, sub)
@@ -36,7 +35,7 @@ def insertExMarkInIfAndWhile(line, sub):
     return line
 
 
-# Removing negation from condition
+# Removing negation from entire condition
 def removeExMarkInIfAndWhile(line, sub):
     index = line.find(sub)
     line = line[:index + len(sub)] + line[index + len(sub) + 2:len(line) - 4] + line[len(line) - 3:]
@@ -47,7 +46,9 @@ def removeExMarkInIfAndWhile(line, sub):
 def main():
     javaFiles = list(Path(".").rglob("*.java"))
     for file in javaFiles:
-        openFileForIfAndWhile(file.absolute().as_posix())
+        path = file.absolute().as_posix()
+        subprocess.call(['java', '-jar', 'google-java-format-1.7-all-deps.jar', '--replace', path])
+        openFileForIfAndWhile(path)
 
 
 if __name__ == "__main__":
