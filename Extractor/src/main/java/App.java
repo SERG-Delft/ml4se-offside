@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 public class App {
     private static String dirPath;
@@ -19,11 +18,11 @@ public class App {
     private static List<MethodDeclaration> mutatedMethods = new ArrayList<>();
 
     public static void main(String[] args) {
-        dirPath = Paths.get(System.getProperty("user.dir")).toString();
-        outPutDir = "myfile.txt";
-        maxPathLength = "8";
-        maxPathWidth = "2";
-        maxContexts = 200;
+        dirPath = args[0];//Paths.get(System.getProperty("user.dir")).toString();
+        outPutDir = args[1];//"myfile.txt";
+        maxPathLength = args[2];//"8";
+        maxPathWidth = args[3];//"2";
+        maxContexts = args[4];//200;
         extractDir();
     }
 
@@ -67,13 +66,36 @@ public class App {
         Process p = pb.start();
 
         BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-        String message = in.lines().collect(Collectors.joining());
+        String contextPathForMethod;
+        ArrayList<String> lines = new ArrayList<>();
+        while ((contextPathForMethod = in.readLine()) != null) {
+            lines.add(contextPathForMethod);
+        }
+        ArrayList<String> result = new ArrayList<>();
+        for (String line : lines) {
+            ArrayList<String> parts = new ArrayList<>(Arrays.asList(line.trim().split(" ")));
+            String methodName = parts.get(0);
+            ArrayList<String> currentResultLineParts = new ArrayList<>(Collections.singletonList(type));
+            parts.remove(0);
+            Iterator<String> partsIterator = parts.iterator();
+            int i = 0;
+            while (partsIterator.hasNext() && i < maxContexts) {
+                String[] contextParts = partsIterator.next().split(",");
+                String contextWord1 = contextParts[0];
+                String contextPath = contextParts[1];
+                String contextWord2 = contextParts[2];
+                currentResultLineParts.add(contextWord1 + "," + contextPath + "," + contextWord2);
+                i++;
+            }
+            String resultLine = String.join(" ", currentResultLineParts);
+            result.add(resultLine);
+        }
         try (FileWriter fw = new FileWriter(outPutDir, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
-            out.println(type);
-            out.println(message);
+            for (String contextPath : result) {
+                out.println(contextPath);
+            }
         } catch (IOException e) {
             System.out.println("exception occoured: " + e);
         }
