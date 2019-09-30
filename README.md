@@ -1,7 +1,18 @@
 # ML4SA
 
+## Current Progress
+We have extracted the code2vec model to generate vectors which our model will use. A small example can be seen 
+in the custom_code2vec branch. We plan to use theses vectors like described in DeepBugs paper (instead of generating
+vector from specific parts of code, we go for the whole method).
+  
+We are also working on generating a dataset. Currently we can produce code that mutates code regarding AND and OR
+statements. These are in turn made into ContextPaths (that is readable by code2vec). The code is currently in 
+JavaExtractor branch.
+
 ## Description: 
-Replicate the Deep Bugs paper covered in the first lecture and combine it with Code2Vec and explore the benefits of other NN architectures. We plan on picking 2-3 types of bugs and create a model that can indicate how likely a piece of code (single function) is to contain any of those bugs. The bugs we are currently looking at are:
+Replicate the Deep Bugs paper covered in the first lecture and combine it with Code2Vec and explore the benefits of 
+other NN architectures. We plan on picking 2-3 types of bugs and create a model that can indicate how likely a piece 
+of code (single function) is to contain any of those bugs. The bugs we are currently looking at are:
 
 - Missing (or unnecessary) negation
 - Mixed and/or operators
