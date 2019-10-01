@@ -22,7 +22,7 @@ public class App {
         outPutDir = args[1];//"myfile.txt";
         maxPathLength = args[2];//"8";
         maxPathWidth = args[3];//"2";
-        maxContexts = args[4];//200;
+        maxContexts = Integer.parseInt(args[4]);//200;
         extractDir();
     }
 
@@ -53,13 +53,13 @@ public class App {
             try {
                 extractContextPath("0", "originals.txt");
                 extractContextPath("1", "mutants.txt");
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private static void extractContextPath(String type, String fileName) throws IOException, InterruptedException {
+    private static void extractContextPath(String type, String fileName) throws IOException {
         Path currentPath = Paths.get(System.getProperty("user.dir"), "src", "main", "java");
         Path contextExtractorPath = Paths.get(currentPath.toString(), "JavaExtractor-0.0.2-SNAPSHOT.jar");
         ProcessBuilder pb = new ProcessBuilder("java", "-cp", contextExtractorPath.toString(), "JavaExtractor.App", "--max_path_length", maxPathLength, "--max_path_width", maxPathWidth, "--file", fileName, "--no_hash");
