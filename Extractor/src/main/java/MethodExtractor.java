@@ -1,16 +1,14 @@
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Random;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import com.github.javaparser.*;
+import com.github.javaparser.ParseProblemException;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.stmt.IfStmt;
+
+import java.util.List;
+import java.util.Random;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class MethodExtractor {
     private final Random rand = new Random();
@@ -42,7 +40,6 @@ public class MethodExtractor {
 
         int mutationIndex = rand.nextInt(mutationCandidates.size());
         mutateExpression(mutationCandidates.get(mutationIndex));
-
 
 
         return mutatedMethod;

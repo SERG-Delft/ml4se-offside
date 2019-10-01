@@ -14,8 +14,6 @@ public class App {
     private static String maxPathWidth;
     private static int maxContexts;
     private static String outPutDir;
-    private static List<MethodDeclaration> methods = new ArrayList<>();
-    private static List<MethodDeclaration> mutatedMethods = new ArrayList<>();
 
     public static void main(String[] args) {
         dirPath = args[0];//Paths.get(System.getProperty("user.dir")).toString();
@@ -33,33 +31,15 @@ public class App {
             Files.walk(Paths.get(dirPath)).filter(Files::isRegularFile)
                     .filter(path -> path.toString().toLowerCase().endsWith(".java"))
                     .forEach(path -> {
-                        ExtractionTask task = new ExtractionTask(path);
-                        tasks.add(task);
+                        ExtractionTask extractor = new ExtractionTask(path);
+                        printMethodsAndContextPathsToFile(extractor.processFile());
                     });
         } catch (IOException e) {
             e.printStackTrace();
-            return;
-        }
-        try {
-            executor.invokeAll(tasks);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            executor.shutdown();
-
-            printMethods();
-            System.out.println("Original Methods");
-
-            try {
-                extractContextPath("0", "originals.txt");
-                extractContextPath("1", "mutants.txt");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
-    private static void extractContextPath(String type, String fileName) throws IOException {
+    private static void extractContextPathFromFile(String type, String fileName) throws IOException {
         Path currentPath = Paths.get(System.getProperty("user.dir"), "src", "main", "java");
         Path contextExtractorPath = Paths.get(currentPath.toString(), "JavaExtractor-0.0.2-SNAPSHOT.jar");
         ProcessBuilder pb = new ProcessBuilder("java", "-cp", contextExtractorPath.toString(), "JavaExtractor.App", "--max_path_length", maxPathLength, "--max_path_width", maxPathWidth, "--file", fileName, "--no_hash");
@@ -101,34 +81,30 @@ public class App {
         }
     }
 
-    public static void addToMethods(List<MethodDeclaration> newMethods) {
-        methods.addAll(newMethods);
-    }
-
-    public static void addToMutatedMethods(List<MethodDeclaration> newMutatedMethods) {
-        mutatedMethods.addAll(newMutatedMethods);
-    }
-
-    public static void printMethods() {
+    public static void printMethodsAndContextPathsToFile(LinkedHashMap<String, List<MethodDeclaration>> methodsAndMutatedMethods) {
+        List<MethodDeclaration> methods = methodsAndMutatedMethods.get("0");
+        List<MethodDeclaration> mutatedMethods = methodsAndMutatedMethods.get("1");
         try {
-            PrintWriter writer = new PrintWriter("originals.txt", "UTF-8");
+            PrintWriter writer = new PrintWriter(new FileWriter("correct.txt", false));
 
             for (MethodDeclaration method : methods) {
                 writer.println(method);
                 writer.println();
             }
             writer.close();
+            extractContextPathFromFile("0", "correct.txt");
         } catch (Exception e) {
             e.printStackTrace();
         }
         try {
-            PrintWriter writer = new PrintWriter("mutants.txt", "UTF-8");
+            PrintWriter writer = new PrintWriter(new FileWriter("incorrect.txt", false));
 
             for (MethodDeclaration mutatedMethod : mutatedMethods) {
                 writer.println(mutatedMethod);
                 writer.println();
             }
             writer.close();
+            extractContextPathFromFile("0", "incorrect.txt");
         } catch (Exception e) {
             e.printStackTrace();
         }
