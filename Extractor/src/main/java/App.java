@@ -17,7 +17,6 @@ public class App {
     private static String maxPathLength;
     private static String maxPathWidth;
     private static int maxContexts;
-    private static String outPutDir;
 
     private static Instant start;
 
@@ -33,22 +32,20 @@ public class App {
     private static ReentrantLock doneLock = new ReentrantLock();
     private static int doneCount = 0;
 
-    private static ReentrantLock writerLock = new ReentrantLock();
-    private static PrintWriter outWriter;
+    private static PrintWriter finalWriter;
 
     private static void finalStats() {
         long secondsElapsed = Duration.between(start, Instant.now()).getSeconds();
         System.out.println("Task finished");
         System.out.println("Total amount of files: " + totalCount);
         System.out.println("Files failed to be parsed: " + failCount);
-        System.out.println("Time elapsed: " +
-                String.format("%d:%02d:%02d",
+        System.out.println("Time elapsed: " + String.format("%d:%02d:%02d",
                         secondsElapsed / 3600, (secondsElapsed % 3600) / 60, secondsElapsed % 60));
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         dirPath = args[0];
-        outPutDir = args[1];
+        String outPutDir = args[1];
         maxPathLength = args[2];
         maxPathWidth = args[3];
         maxContexts = Integer.parseInt(args[4]);
@@ -56,13 +53,14 @@ public class App {
         start = Instant.now();
         System.out.println("Starting parsing with " + threadCount + " threads");
 
-        outWriter = new PrintWriter(new BufferedWriter(new FileWriter(outPutDir, true)));
+        finalWriter = new PrintWriter(new FileWriter(outPutDir, true));
 
         extractDir();
     }
 
-    private static void extractDir() throws InterruptedException {
+    private static void extractDir() throws InterruptedException, IOException {
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        ArrayList<ExtractionThread> threads = new ArrayList<>();
         try {
             totalCount = Files.walk(Paths.get(dirPath)).filter(Files::isRegularFile)
                     .filter(path -> path.toString().toLowerCase().endsWith(".java")).count();
@@ -70,7 +68,8 @@ public class App {
             Files.walk(Paths.get(dirPath)).filter(Files::isRegularFile)
                     .filter(path -> path.toString().toLowerCase().endsWith(".java")).
                     forEach(path -> {
-                        Runnable extractor = new ExtractionThread(new ExtractionTask(path), count[0]);
+                        ExtractionThread extractor = new ExtractionThread(new ExtractionTask(path), count[0]);
+                        threads.add(extractor);
                         executor.execute(extractor);
                         ++count[0];
                     });
@@ -80,19 +79,49 @@ public class App {
         executor.shutdown();
         while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
             doneLock.lock();
-            System.out.println("Awaiting completion. Completed: " + doneCount + " of " + totalCount);
+            failCountLock.lock();
+            System.out.println("Awaiting completion. Completed: " + doneCount + " of " + totalCount + ". Failed to parse: " + failCount);
+            failCountLock.unlock();
             doneLock.unlock();
         }
+        Instant parseEnd = Instant.now();
+        long secondsElapsed = Duration.between(start, parseEnd).getSeconds();
+        System.out.println("Parsing completed in " + String.format("%d:%02d:%02d",
+                secondsElapsed / 3600, (secondsElapsed % 3600) / 60, secondsElapsed % 60));
+
+        for (ExtractionThread extractor : threads) {
+            for (String line : extractor.getThreadResult()) {
+                finalWriter.println(line);
+            }
+        }
+        secondsElapsed = Duration.between(parseEnd, Instant.now()).getSeconds();
+        System.out.println("Merging completed in " + String.format("%d:%02d:%02d",
+                secondsElapsed / 3600, (secondsElapsed % 3600) / 60, secondsElapsed % 60));
         finalStats();
     }
 
     public static class ExtractionThread implements Runnable{
         private ExtractionTask extractor;
-        private String fileNameTemplate;
+        private String tempFileNameTemplate;
+        private String resultFileName;
+        private PrintWriter outWriter;
 
         public ExtractionThread(ExtractionTask extractor, int threadId) {
             this.extractor = extractor;
-            this.fileNameTemplate = "correct" + threadId + ".txt";
+            this.tempFileNameTemplate = "correct" + threadId + ".txt";
+            this.resultFileName = "tempResult" + threadId + ".txt";
+        }
+
+        public ArrayList<String> getThreadResult() throws IOException {
+            BufferedReader br = new BufferedReader(new FileReader(resultFileName));
+            ArrayList<String> result = new ArrayList<>();
+            String line = br.readLine();
+            while (line != null) {
+                result.add(line);
+                line = br.readLine();
+            }
+            new File(resultFileName).delete();
+            return result;
         }
 
         @Override
@@ -111,29 +140,32 @@ public class App {
         }
 
         private void printMethodsAndContextPathsToFile(LinkedHashMap<String, List<MethodDeclaration>> methodsAndMutatedMethods) throws IOException {
+            outWriter = new PrintWriter(new FileWriter(resultFileName, false));
+
             List<MethodDeclaration> methods = methodsAndMutatedMethods.get("0");
             List<MethodDeclaration> mutatedMethods = methodsAndMutatedMethods.get("1");
 
-            PrintWriter writer = new PrintWriter(new FileWriter(fileNameTemplate, false));
+            PrintWriter writer = new PrintWriter(new FileWriter(tempFileNameTemplate, false));
 
             for (MethodDeclaration method : methods) {
                 writer.println(method);
                 writer.println();
             }
             writer.close();
-            extractContextPathFromFile("0", fileNameTemplate);
+            extractContextPathFromFile("0", tempFileNameTemplate);
 
-            writer = new PrintWriter(new FileWriter("in" + fileNameTemplate, false));
+            writer = new PrintWriter(new FileWriter("in" + tempFileNameTemplate, false));
 
             for (MethodDeclaration mutatedMethod : mutatedMethods) {
                 writer.println(mutatedMethod);
                 writer.println();
             }
             writer.close();
-            extractContextPathFromFile("0", "in" + fileNameTemplate);
+            extractContextPathFromFile("0", "in" + tempFileNameTemplate);
             doneLock.lock();
             ++doneCount;
             doneLock.unlock();
+            outWriter.close();
         }
 
         private void extractContextPathFromFile(String type, String fileName) throws IOException {
@@ -148,10 +180,8 @@ public class App {
             while ((contextPathForMethod = in.readLine()) != null) {
                 lines.add(contextPathForMethod);
             }
-            ArrayList<String> result = new ArrayList<>();
             for (String line : lines) {
                 ArrayList<String> parts = new ArrayList<>(Arrays.asList(line.trim().split(" ")));
-                String methodName = parts.get(0);
                 ArrayList<String> currentResultLineParts = new ArrayList<>(Collections.singletonList(type));
                 parts.remove(0);
                 Iterator<String> partsIterator = parts.iterator();
@@ -164,14 +194,8 @@ public class App {
                     currentResultLineParts.add(contextWord1 + "," + contextPath + "," + contextWord2);
                     i++;
                 }
-                String resultLine = String.join(" ", currentResultLineParts);
-                result.add(resultLine);
+                outWriter.println(String.join(" ", currentResultLineParts));
             }
-            writerLock.lock();
-            for (String contextPath : result) {
-                outWriter.println(contextPath);
-            }
-            writerLock.unlock();
             new File(fileName).delete();
         }
     }
