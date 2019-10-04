@@ -27,7 +27,7 @@ public class ExtractionTask {
         try {
             code = new String(Files.readAllBytes(this.filePath));
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
         List<MethodDeclaration> methods = methodExtractor.extractMethodsFromCode(code);

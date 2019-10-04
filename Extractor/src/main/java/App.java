@@ -53,7 +53,7 @@ public class App {
         start = Instant.now();
         System.out.println("Starting parsing with " + threadCount + " threads");
 
-        finalWriter = new PrintWriter(new FileWriter(outPutDir, true));
+        finalWriter = new PrintWriter(new FileWriter(outPutDir, false));
 
         extractDir();
     }
@@ -77,7 +77,7 @@ public class App {
             e.printStackTrace();
         }
         executor.shutdown();
-        while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+        while (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
             doneLock.lock();
             failCountLock.lock();
             System.out.println("Awaiting completion. Completed: " + doneCount + " of " + totalCount + ". Failed to parse: " + failCount);
@@ -94,6 +94,7 @@ public class App {
                 finalWriter.println(line);
             }
         }
+        finalWriter.close();
         secondsElapsed = Duration.between(parseEnd, Instant.now()).getSeconds();
         System.out.println("Merging completed in " + String.format("%d:%02d:%02d",
                 secondsElapsed / 3600, (secondsElapsed % 3600) / 60, secondsElapsed % 60));
@@ -112,9 +113,15 @@ public class App {
             this.resultFileName = "tempResult" + threadId + ".txt";
         }
 
-        public ArrayList<String> getThreadResult() throws IOException {
-            BufferedReader br = new BufferedReader(new FileReader(resultFileName));
+        public ArrayList<String> getThreadResult() throws IOException{
             ArrayList<String> result = new ArrayList<>();
+            BufferedReader br = null;
+            try {
+                br = new BufferedReader(new FileReader(resultFileName));
+            }
+            catch (Exception ex) {
+                return result;
+            }
             String line = br.readLine();
             while (line != null) {
                 result.add(line);

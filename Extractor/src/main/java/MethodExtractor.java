@@ -20,7 +20,7 @@ public class MethodExtractor {
         try {
             parsedClass = StaticJavaParser.parse(code);
         } catch (ParseProblemException e) {
-            e.printStackTrace();
+            //System.out.println("Failed to parse string: " + code);
         }
         return extractMethodsFromClass(parsedClass);
     }
