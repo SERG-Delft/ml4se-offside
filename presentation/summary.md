@@ -66,25 +66,29 @@ source code.
 
 * Appeared in Annual Meeting of the Association for Computational Linguistics (ACL)
 * Cited 93 times according to Google Scholar
-* Why is it important?
+* Was one of the first paper to consider the topic of generating natural language snippets based on source code. Shows how quickly the body of knowledge has increased in the last few years.
 
 #### People
-_A brief profile of the main authors_
+* Srinivasan Iyer - PHD student in Computer Science at the University of Washington.
+* Ioannis Konstas - Then a research associate at the University of Washington, currently an associate professor at Herriot-Watt University with a focus on Natural Language Processing & Generating.
+* Alvin Cheung - Then a member of the University of Washington CSE faculty, currently an associate professor in Computer Science at UC Berkely with a focus on Program Analysis & Synthesis.
+* Luke Zettlemoyer - An assistant professor at the University of Washington with a focus on Machine Learning and NLP.
 
 #### Motivation
-_Why do this research?_
+Being able to generate accurate summarizations based on source code alone would improve often lacking or outdated documentation making maintaining code bases much easier. Being able to find/generate source code from NL would reduce code duplicates, make developers more efficient and possibly make (simple) programming tasks achievable for non-programmers.
 
 #### Research method
-_What does the paper do?_
+The paper proposes a data-driven approach to creating a model which can generate high-level descriptions of source code and perform code retrieval.
+StackOverflow was used to collect pairs of questions and code snippets in accepted answers which are then used to train the ML model.
 
 #### ML4SE techniques used
-_How does the paper use ML techniques_
+The paper uses a combination of an attention mechanism, to ensure correct selection, and an LSTM, to ensure coverage of concepts.
 
 #### Results
-_What does the paper find?_
+The paper finds that this data-driven approach produces some very promising results and outperformes all the benchmarks selected. More specifically they found that the model was able to produce correct summaries roughly 37% of the time according to human evaluation.
 
 #### Implications
-_Why are the results important?_
+This paper showed that using a data-driven approach to generating high-level summaries of code was a viable option and that further research into this field might yield real successes that might be used outside of research only.
 
 #### Techincal questions
 * Why do the authors remove variable names in SQL examples and keep them in C# examples?
