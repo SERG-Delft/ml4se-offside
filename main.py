@@ -32,9 +32,11 @@ if __name__ == '__main__':
                                        model_input_tensors_former=_TFEvaluateModelInputTensorsFormer(),
                                        config=config)
 
-    @tf.function # With this tf.functionn we stack the other tf.function such that they are combined into a single call graph on the gpu.
+    #@tf.function # With this tf.functionn we stack the other tf.function such that they are combined into a single call graph on the gpu.
     def predict(line):
         # Extract numerical form suitable for model
+        print("line")
+        print(line)
         reader_output = predict_reader.process_input_row(line)
         inputs = [reader_output[1], reader_output[2], reader_output[3], tf.cast(reader_output[4], tf.float32)]
 
@@ -42,19 +44,19 @@ if __name__ == '__main__':
         return model(inputs)
 
 
-    while True:
-        print(
-            'Modify the file: "%s" and press any key when ready, or "q" / "quit" / "exit" to exit' % input_filename)
-        user_input = input()
-        if user_input.lower() in ['exit', 'quit', 'q']:
-            print('Exiting...')
-            exit()
-        try:
-            # Generate raw input in string format method|name 1,2,3 ...,...,...
-            predict_lines, hash_to_string_dict = path_extractor.extract_paths(input_filename)
-        except ValueError as e:
-            print(e)
-            continue
 
+    try:
+        # Generate raw input in string format method|name 1,2,3 ...,...,...
+        predict_lines, hash_to_string_dict = path_extractor.extract_paths(input_filename)
+        print("hash_to_string_dict")
+        print(hash_to_string_dict)
+        print("predict_lines")
+        print(predict_lines)
         for line in predict_lines:
-            print(predict(line))
+            code_vectors, attention_weights = predict(line)
+            # print(code_vectors)
+            # print(attention_weights)
+    except ValueError as e:
+        print(e)
+
+

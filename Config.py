@@ -22,7 +22,7 @@ class Config:
         self.MAX_PATH_WIDTH = 2
 
         self.ROOT = os.path.dirname(__file__)
-        self.EXTRACTOR_JAR_PATH = os.path.join(self.ROOT, "jars", "JavaExtractor-0.0.2-SNAPSHOT.jar")
+        self.EXTRACTOR_JAR_PATH = os.path.join(self.ROOT, "jars", "JavaExtractor-0.0.1-SNAPSHOT.jar")
         self.ORIGINAL_MODEL_DIR = os.path.join(self.ROOT, "resources", "models", "java14m_trainable")
         self.ORIGINAL_MODEL_NAME = "saved_model_iter8"
         self.CUSTOM_MODEL_DIR = os.path.join(self.ROOT, "resources", "models", "custom", "model")

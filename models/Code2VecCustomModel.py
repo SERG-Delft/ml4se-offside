@@ -3,6 +3,7 @@ from typing import List, Tuple
 import numpy as np
 import tensorflow as tf
 
+from Config import Config
 from scripts.PathContextReader import ModelInputTensorsFormer, ReaderInputTensors
 from utils.Types import GraphInput
 
@@ -63,7 +64,7 @@ class Code2VecCustomModel(tf.keras.Model):
     def call(
             self,
             inputs: Tuple[GraphInput, GraphInput, GraphInput, GraphInput],
-            training: bool=False,
+            #training: bool=False,
             **kwargs
     ):
         #training = kwargs["training"] if "training" in kwargs else None
@@ -83,8 +84,8 @@ class Code2VecCustomModel(tf.keras.Model):
         _assert_shape(target_word_embed, [batch_size, MAX_CONTEXTS, TOKEN_EMBEDDINGS_SIZE])
 
         context_embed = tf.concat([source_word_embed, path_embed, target_word_embed], axis=-1)
-        if training:
-            context_embed = tf.keras.layers.Dropout(rate=1 - DROPOUT_KEEP_RATE)(context_embed)
+        #if training:
+        #    context_embed = tf.keras.layers.Dropout(rate=1 - DROPOUT_KEEP_RATE)(context_embed)
         _assert_shape(context_embed, [batch_size, MAX_CONTEXTS, CODE_VECTOR_SIZE])
 
         flat_embed = tf.reshape(context_embed, [-1, CODE_VECTOR_SIZE])
@@ -153,3 +154,4 @@ class _TFEvaluateModelInputTensorsFormer(ModelInputTensorsFormer):
             path_strings=input_row[6],
             path_target_token_strings=input_row[7]
         )
+
