@@ -198,7 +198,7 @@ public class App {
                     String contextWord1 = contextParts[0];
                     String contextPath = contextParts[1];
                     String contextWord2 = contextParts[2];
-                    currentResultLineParts.add(contextWord1 + "," + contextPath + "," + contextWord2);
+                    currentResultLineParts.add(contextWord1 + "," + contextPath.hashCode() + "," + contextWord2);
                     i++;
                 }
                 String resultString = String.join(" ", currentResultLineParts);
