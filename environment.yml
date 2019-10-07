@@ -1,0 +1,12 @@
+name: ML4SA
+channels:
+  - conda-forge
+  - menpo
+dependencies:
+  - python=3.6
+  - numpy
+  - mypy
+  - git
+  - pip
+  - pip:
+      - tensorflow-gpu==2.0.0-rc1
