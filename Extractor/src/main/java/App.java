@@ -168,7 +168,7 @@ public class App {
                 writer.println();
             }
             writer.close();
-            extractContextPathFromFile("0", "in" + tempFileNameTemplate);
+            extractContextPathFromFile("1", "in" + tempFileNameTemplate);
             doneLock.lock();
             ++doneCount;
             doneLock.unlock();
@@ -201,9 +201,14 @@ public class App {
                     currentResultLineParts.add(contextWord1 + "," + contextPath + "," + contextWord2);
                     i++;
                 }
-                outWriter.println(String.join(" ", currentResultLineParts));
+                String resultString = String.join(" ", currentResultLineParts);
+                for (i = 0; i < maxContexts - parts.size(); ++i) {
+                    resultString = resultString + " ";
+                }
+                outWriter.println(resultString);
             }
             new File(fileName).delete();
         }
     }
 }
+
