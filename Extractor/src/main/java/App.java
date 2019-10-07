@@ -44,12 +44,12 @@ public class App {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        dirPath = args[0];
-        String outPutDir = args[1];
-        maxPathLength = args[2];
-        maxPathWidth = args[3];
-        maxContexts = Integer.parseInt(args[4]);
-        threadCount = Integer.parseInt(args[5]);
+        dirPath = args[0]; //absolute path to training data root
+        String outPutDir = args[1]; //"resultfile.txt";
+        maxPathLength = args[2]; //"8"
+        maxPathWidth = args[3]; //"2"
+        maxContexts = Integer.parseInt(args[4]); //200;
+        threadCount = Integer.parseInt(args[5]); // around 10 (depends on the computer)
         start = Instant.now();
         System.out.println("Starting parsing with " + threadCount + " threads");
 
