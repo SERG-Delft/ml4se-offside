@@ -16,11 +16,11 @@ public class ExtractionTask {
         this.methodExtractor = new MethodExtractor();
     }
 
-/*    @Override
-    public Void call() throws Exception {
-        processFile();
-        return null;
-    }*/
+//    @Override
+//    public Void call() throws Exception {
+//        processFile();
+//        return null;
+//    }
 
     public LinkedHashMap processFile() {
         String code = "";

@@ -1,9 +1,8 @@
+import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseProblemException;
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
-import com.github.javaparser.ast.stmt.IfStmt;
 
 import java.util.List;
 import java.util.Random;
@@ -18,7 +17,7 @@ public class MethodExtractor {
     public List<MethodDeclaration> extractMethodsFromCode(String code) {
         CompilationUnit parsedClass = null;
         try {
-            parsedClass = StaticJavaParser.parse(code);
+            parsedClass = JavaParser.parse(code);
         } catch (ParseProblemException e) {
             //System.out.println("Failed to parse string: " + code);
         }
@@ -26,15 +25,15 @@ public class MethodExtractor {
     }
 
     private List<MethodDeclaration> extractMethodsFromClass(CompilationUnit parsedClass) {
-        return parsedClass.findAll(MethodDeclaration.class).stream()
+        return parsedClass.getNodesByType(MethodDeclaration.class).stream()
                 .filter(this::containsBinaryWithOffByOne)
                 .collect(Collectors.toList());
     }
 
     public MethodDeclaration mutateMethod(MethodDeclaration method) {
-        MethodDeclaration mutatedMethod = method.clone();
+        MethodDeclaration mutatedMethod = (MethodDeclaration) method.clone();
 
-        List<BinaryExpr> mutationCandidates = mutatedMethod.findAll(BinaryExpr.class).stream()
+        List<BinaryExpr> mutationCandidates = mutatedMethod.getNodesByType(BinaryExpr.class).stream()
                 .filter(containsOffByOne())
                 .collect(Collectors.toList());
 
@@ -47,26 +46,22 @@ public class MethodExtractor {
 
     private void mutateExpression(BinaryExpr expression) {
         BinaryExpr.Operator operator = expression.getOperator();
-        if (operator.equals(BinaryExpr.Operator.GREATER)) expression.setOperator(BinaryExpr.Operator.GREATER_EQUALS);
-        else if (operator.equals(BinaryExpr.Operator.GREATER_EQUALS)) expression.setOperator(BinaryExpr.Operator.GREATER);
-        else if (operator.equals(BinaryExpr.Operator.LESS_EQUALS)) expression.setOperator(BinaryExpr.Operator.LESS);
-        else if (operator.equals(BinaryExpr.Operator.LESS)) expression.setOperator(BinaryExpr.Operator.LESS_EQUALS);
-    }
-
-    private boolean containsIfStmt(MethodDeclaration method) {
-        return method.findAll(IfStmt.class).size() != 0;
+        if (operator.equals(BinaryExpr.Operator.greater)) expression.setOperator(BinaryExpr.Operator.greaterEquals);
+        else if (operator.equals(BinaryExpr.Operator.greaterEquals)) expression.setOperator(BinaryExpr.Operator.greater);
+        else if (operator.equals(BinaryExpr.Operator.lessEquals)) expression.setOperator(BinaryExpr.Operator.less);
+        else if (operator.equals(BinaryExpr.Operator.less)) expression.setOperator(BinaryExpr.Operator.lessEquals);
     }
 
     private boolean containsBinaryWithOffByOne(MethodDeclaration method) {
-        return method.findAll(BinaryExpr.class).stream()
+        return method.getNodesByType(BinaryExpr.class).stream()
                 .filter(containsOffByOne())
                 .toArray().length != 0;
     }
 
     private Predicate<BinaryExpr> containsOffByOne() {
-        return expr -> expr.getOperator().equals(BinaryExpr.Operator.GREATER) ||
-                expr.getOperator().equals(BinaryExpr.Operator.GREATER_EQUALS) ||
-                expr.getOperator().equals(BinaryExpr.Operator.LESS) ||
-                expr.getOperator().equals(BinaryExpr.Operator.LESS_EQUALS);
+        return expr -> expr.getOperator().equals(BinaryExpr.Operator.greater) ||
+                expr.getOperator().equals(BinaryExpr.Operator.greaterEquals) ||
+                expr.getOperator().equals(BinaryExpr.Operator.less) ||
+                expr.getOperator().equals(BinaryExpr.Operator.lessEquals);
     }
 }
