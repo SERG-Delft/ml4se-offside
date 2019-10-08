@@ -44,12 +44,24 @@ public class App {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        dirPath = "/home/hendrig/test/";
-        String outPutDir = "resultfile.txt";
-        maxPathLength = "8";
-        maxPathWidth = "2";
-        maxContexts = 200;
-        threadCount = 1;
+        //Values for easier debugging
+//        dirPath = "C:\\Users\\Lenovo\\Downloads\\java-med\\test\\Activiti__Activiti\\activiti-spring\\src\\main\\java\\org\\activiti\\spring";
+//        String outPutDir = "resultfile.txt";
+//        maxPathLength = "8";
+//        maxPathWidth = "2";
+//        maxContexts = 200;
+//        threadCount = 1;
+
+        //Values read from command line
+        dirPath = args[0]; //absolute path to training data root
+        String outPutDir = args[1]; //"resultfile.txt";
+        maxPathLength = args[2]; //"8"
+        maxPathWidth = args[3]; //"2"
+        maxContexts = Integer.parseInt(args[4]); //200;
+        threadCount = Integer.parseInt(args[5]); // around 10 (depends on the computer)
+
+
+
         start = Instant.now();
         System.out.println("Starting parsing with " + threadCount + " threads");
 
@@ -152,23 +164,25 @@ public class App {
             List<MethodDeclaration> methods = methodsAndMutatedMethods.get("0");
             List<MethodDeclaration> mutatedMethods = methodsAndMutatedMethods.get("1");
 
-            PrintWriter writer = new PrintWriter(new FileWriter(tempFileNameTemplate, false));
+            if (methods.size() != 0) {
+                PrintWriter writer = new PrintWriter(new FileWriter(tempFileNameTemplate, false));
 
-            for (MethodDeclaration method : methods) {
-                writer.println(method);
-                writer.println();
+                for (MethodDeclaration method : methods) {
+                    writer.println(method);
+                    writer.println();
+                }
+                writer.close();
+                extractContextPathFromFile("0", tempFileNameTemplate);
+
+                writer = new PrintWriter(new FileWriter("in" + tempFileNameTemplate, false));
+
+                for (MethodDeclaration mutatedMethod : mutatedMethods) {
+                    writer.println(mutatedMethod);
+                    writer.println();
+                }
+                writer.close();
+                extractContextPathFromFile("1", "in" + tempFileNameTemplate);
             }
-            writer.close();
-            extractContextPathFromFile("0", tempFileNameTemplate);
-
-            writer = new PrintWriter(new FileWriter("in" + tempFileNameTemplate, false));
-
-            for (MethodDeclaration mutatedMethod : mutatedMethods) {
-                writer.println(mutatedMethod);
-                writer.println();
-            }
-            writer.close();
-            extractContextPathFromFile("1", "in" + tempFileNameTemplate);
             doneLock.lock();
             ++doneCount;
             doneLock.unlock();
@@ -209,6 +223,6 @@ public class App {
             }
             new File(fileName).delete();
         }
-    }
+        }
 }
 

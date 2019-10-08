@@ -27,7 +27,7 @@ public class MethodExtractor {
 
     private List<MethodDeclaration> extractMethodsFromClass(CompilationUnit parsedClass) {
         return parsedClass.findAll(MethodDeclaration.class).stream()
-                .filter(this::containsBinaryWithAndOrOr)
+                .filter(this::containsBinaryWithOffByOne)
                 .collect(Collectors.toList());
     }
 
@@ -35,7 +35,7 @@ public class MethodExtractor {
         MethodDeclaration mutatedMethod = method.clone();
 
         List<BinaryExpr> mutationCandidates = mutatedMethod.findAll(BinaryExpr.class).stream()
-                .filter(containsAndOrOr())
+                .filter(containsOffByOne())
                 .collect(Collectors.toList());
 
         int mutationIndex = rand.nextInt(mutationCandidates.size());
@@ -47,22 +47,26 @@ public class MethodExtractor {
 
     private void mutateExpression(BinaryExpr expression) {
         BinaryExpr.Operator operator = expression.getOperator();
-        if (operator.equals(BinaryExpr.Operator.OR)) expression.setOperator(BinaryExpr.Operator.AND);
-        else expression.setOperator(BinaryExpr.Operator.OR);
+        if (operator.equals(BinaryExpr.Operator.GREATER)) expression.setOperator(BinaryExpr.Operator.GREATER_EQUALS);
+        else if (operator.equals(BinaryExpr.Operator.GREATER_EQUALS)) expression.setOperator(BinaryExpr.Operator.GREATER);
+        else if (operator.equals(BinaryExpr.Operator.LESS_EQUALS)) expression.setOperator(BinaryExpr.Operator.LESS);
+        else if (operator.equals(BinaryExpr.Operator.LESS)) expression.setOperator(BinaryExpr.Operator.LESS_EQUALS);
     }
 
     private boolean containsIfStmt(MethodDeclaration method) {
         return method.findAll(IfStmt.class).size() != 0;
     }
 
-    private boolean containsBinaryWithAndOrOr(MethodDeclaration method) {
+    private boolean containsBinaryWithOffByOne(MethodDeclaration method) {
         return method.findAll(BinaryExpr.class).stream()
-                .filter(containsAndOrOr())
+                .filter(containsOffByOne())
                 .toArray().length != 0;
     }
 
-    private Predicate<BinaryExpr> containsAndOrOr() {
-        return expr -> expr.getOperator().equals(BinaryExpr.Operator.AND) ||
-                expr.getOperator().equals(BinaryExpr.Operator.OR);
+    private Predicate<BinaryExpr> containsOffByOne() {
+        return expr -> expr.getOperator().equals(BinaryExpr.Operator.GREATER) ||
+                expr.getOperator().equals(BinaryExpr.Operator.GREATER_EQUALS) ||
+                expr.getOperator().equals(BinaryExpr.Operator.LESS) ||
+                expr.getOperator().equals(BinaryExpr.Operator.LESS_EQUALS);
     }
 }
