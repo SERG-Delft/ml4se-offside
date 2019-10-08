@@ -45,7 +45,7 @@ public class App {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         //Values for easier debugging
-//        dirPath = "C:\\Users\\Lenovo\\Downloads\\java-med\\test\\Activiti__Activiti\\activiti-spring\\src\\main\\java\\org\\activiti\\spring";
+//        dirPath = "/home/hendrig/test/";
 //        String outPutDir = "resultfile.txt";
 //        maxPathLength = "8";
 //        maxPathWidth = "2";
@@ -223,6 +223,6 @@ public class App {
             }
             new File(fileName).delete();
         }
-        }
+    }
 }
 
