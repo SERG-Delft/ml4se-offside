@@ -18,7 +18,7 @@ public class App {
 	public static void main(String[] args) {
 		try {
 			s_CommandLineValues = new CommandLineValues(args);
-			/*s_CommandLineValues = new CommandLineValues("--max_path_length", "8", "--max_path_width", "2", "--file", "/home/hendrig/projects/Delft/ML4SA/Input.java", "--no_hash");*/
+			/*s_CommandLineValues = new CommandLineValues("--max_path_length", "8", "--max_path_width", "2", "--dir", "/home/user/ml4sa_dataset/dataset/test/");*/
 		} catch (CmdLineException e) {
 			e.printStackTrace();
 			return;

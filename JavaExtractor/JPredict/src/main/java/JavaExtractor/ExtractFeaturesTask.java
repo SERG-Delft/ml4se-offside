@@ -5,10 +5,13 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 import JavaExtractor.Common.MethodExtractor;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -21,6 +24,9 @@ import JavaExtractor.Common.Common;
 import JavaExtractor.FeaturesEntities.ProgramFeatures;
 
 public class ExtractFeaturesTask implements Callable<Void> {
+	private static final String GOOD_CODE_NAME = "0";
+	private static final String BAD_CODE_NAME = "1";
+
 	CommandLineValues m_CommandLineValues;
 	Path filePath;
 	MethodExtractor methodExtractor;
@@ -56,7 +62,7 @@ public class ExtractFeaturesTask implements Callable<Void> {
 		}
 
 		String toPrint = featuresToString(features);
-		// write to a file thread safely
+		// Caller of the JAR should handle writing to a file
 		if (toPrint.length() > 0) {
 			System.out.println(toPrint);
 		}
@@ -96,14 +102,15 @@ public class ExtractFeaturesTask implements Callable<Void> {
 		}
 		FeatureExtractor featureExtractor = new FeatureExtractor(m_CommandLineValues);
 
-		ArrayList<ProgramFeatures> features1 = featureExtractor.extractFeatures(goodCode);
-		// Replace method names with 0 in features1;
-		ArrayList<ProgramFeatures> features2 = featureExtractor.extractFeatures(badCode);
-		// Replace method names with 1 in features2;
+		ArrayList<ProgramFeatures> goodFeatures = featureExtractor.extractFeatures(goodCode);
+		goodFeatures.forEach(feature -> feature.setName(GOOD_CODE_NAME));
+		ArrayList<ProgramFeatures> badFeatures = featureExtractor.extractFeatures(badCode);
+		badFeatures.forEach(feature -> feature.setName(BAD_CODE_NAME));
 
-		features1.addAll(features2);
+		ArrayList<ProgramFeatures> allFeatures = new ArrayList<>();
+		Stream.of(goodFeatures, badFeatures).forEach(allFeatures::addAll);
 
-		return features1;
+		return allFeatures;
 	}
 
 	public String featuresToString(ArrayList<ProgramFeatures> features) {
