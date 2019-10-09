@@ -17,11 +17,26 @@ public class MethodExtractor {
     public MethodExtractor() {}
 
     public List<MethodDeclaration> extractMethodsFromCode(String code) {
+        final String classPrefix = "public class Test {";
+        final String classSuffix = "}";
+        final String methodPrefix = "SomeUnknownReturnType f() {";
+        final String methodSuffix = "return noSuchReturnValue; }";
+
+        String originalContent = code;
+        String content = originalContent;
         CompilationUnit parsedClass = null;
         try {
-            parsedClass = JavaParser.parse(code);
-        } catch (ParseProblemException e) {
-            //System.out.println("Failed to parse string: " + code);
+            parsedClass = JavaParser.parse(content);
+        } catch (ParseProblemException e1) {
+            // Wrap with a class and method
+            try {
+                content = classPrefix + methodPrefix + originalContent + methodSuffix + classSuffix;
+                parsedClass = JavaParser.parse(content);
+            } catch (ParseProblemException e2) {
+                // Wrap with a class only
+                content = classPrefix + originalContent + classSuffix;
+                parsedClass = JavaParser.parse(content);
+            }
         }
         return extractMethodsFromClass(parsedClass);
     }
