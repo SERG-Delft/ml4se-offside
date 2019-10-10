@@ -7,7 +7,10 @@ resources/models/java14m_trainable
 __pycache__/
 *.py[cod]
 *$py.class
+
+# IntelliJ files
 .idea
+*.iml
 
 # C extensions
 *.so
