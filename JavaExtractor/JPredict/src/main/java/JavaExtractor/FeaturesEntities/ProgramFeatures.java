@@ -3,23 +3,35 @@ package JavaExtractor.FeaturesEntities;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import JavaExtractor.Common.CommandLineValues;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class ProgramFeatures {
 	private String name;
+	CommandLineValues m_CommandLineValues;
 
 	private ArrayList<ProgramRelation> features = new ArrayList<>();
 
-	public ProgramFeatures(String name) {
+	public ProgramFeatures(String name, CommandLineValues m_CommandLineValues) {
 		this.name = name;
+		this.m_CommandLineValues = m_CommandLineValues;
 	}
 
 	@SuppressWarnings("StringBufferReplaceableByString")
 	@Override
 	public String toString() {
+		int lengthOfPadding = m_CommandLineValues.MaxContexts - features.size();
+		// Math.max is to avoid making negative sized array later
+		lengthOfPadding = Math.max(lengthOfPadding, 0);
+
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append(name).append(" ");
-		stringBuilder.append(features.stream().map(ProgramRelation::toString).collect(Collectors.joining(" ")));
+		stringBuilder.append(features.stream().map(ProgramRelation::toString).limit(m_CommandLineValues.MaxContexts).collect(Collectors.joining(" ")));
+
+		if (m_CommandLineValues.Padding) {
+			String spacePadding = new String(new char[lengthOfPadding]).replace("\0", " ");
+			stringBuilder.append(spacePadding);
+		}
 
 		return stringBuilder.toString();
 	}

@@ -103,9 +103,9 @@ public class ExtractFeaturesTask implements Callable<Void> {
 		FeatureExtractor featureExtractor = new FeatureExtractor(m_CommandLineValues);
 
 		ArrayList<ProgramFeatures> goodFeatures = featureExtractor.extractFeatures(goodCode);
-		goodFeatures.forEach(feature -> feature.setName(GOOD_CODE_NAME));
+		goodFeatures.forEach(programFeatures -> programFeatures.setName(GOOD_CODE_NAME));
 		ArrayList<ProgramFeatures> badFeatures = featureExtractor.extractFeatures(badCode);
-		badFeatures.forEach(feature -> feature.setName(BAD_CODE_NAME));
+		badFeatures.forEach(programFeatures -> programFeatures.setName(BAD_CODE_NAME));
 
 		ArrayList<ProgramFeatures> allFeatures = new ArrayList<>();
 		Stream.of(goodFeatures, badFeatures).forEach(allFeatures::addAll);

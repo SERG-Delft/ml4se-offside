@@ -24,8 +24,14 @@ public class CommandLineValues {
 	@Option(name = "--max_path_width", required = true)
 	public int MaxPathWidth;
 
+	@Option(name = "--max_contexts", required = true)
+	public int MaxContexts;
+
 	@Option(name = "--no_hash", required = false)
 	public boolean NoHash = false;
+
+	@Option(name = "--padding", required = false)
+	public boolean Padding = true;
 
 	@Option(name = "--num_threads", required = false)
 	public int NumThreads = 32;
