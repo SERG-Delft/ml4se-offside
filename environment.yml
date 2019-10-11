@@ -10,3 +10,4 @@ dependencies:
   - pip
   - pip:
       - tensorflow-gpu==2.0.0-rc1
+      - sklearn

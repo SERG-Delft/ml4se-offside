@@ -3,6 +3,7 @@ import tensorflow as tf
 
 from Config import Config
 from models.Code2VecCustomModel import Code2VecCustomModel, _TFEvaluateModelInputTensorsFormer
+from models.CustomModel import CustomModel
 from scripts.Extractor import Extractor
 from scripts.PathContextReader import PathContextReader
 from utils.Vocabularies import Code2VecVocabs
@@ -19,10 +20,10 @@ if __name__ == '__main__':
                                max_path_width=config.MAX_PATH_WIDTH)
     # Example use case of this model.
     # Create a model
-    model = Code2VecCustomModel(config)
-    # This load the weights from the original code2vec.
-    # Note that these should be converted first using the ExtractWeightRealCode2Vec.py script.
-    model.load_weights("resources/models/custom/model")
+    code2vec = Code2VecCustomModel(config)
+    model = CustomModel(code2vec)
+    model.load_weights("resources/models/custom3/model")
+
 
     input_filename = 'Input.java'
     config.get_logger().info('Starting interactive prediction...')
@@ -53,9 +54,8 @@ if __name__ == '__main__':
         print("predict_lines")
         print(predict_lines)
         for line in predict_lines:
-            code_vectors, attention_weights = predict(line)
-            # print(code_vectors)
-            # print(attention_weights)
+            prediction = predict(line)
+            print(prediction)
     except ValueError as e:
         print(e)
 

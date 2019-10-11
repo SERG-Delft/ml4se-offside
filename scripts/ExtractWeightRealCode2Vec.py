@@ -15,9 +15,6 @@ def main() -> None:
     This model is then saved to disk in the custom model dir such that it can be loaded in the future.
     """
     config = Config(set_defaults=True)
-    print(config.ORIGINAL_MODEL_DIR)
-    print(config.CUSTOM_MODEL_DIR)
-
     word_vocab, path_vocab, transformer, attention = extract_weights_check_points(config.ORIGINAL_MODEL_DIR, config.ORIGINAL_MODEL_NAME)
 
     model = Code2VecCustomModel(config=config)

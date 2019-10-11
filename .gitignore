@@ -1,7 +1,11 @@
 # tf weights
-resources/models/custom
-resources/models/java14m_trainable
+resources/models/
 
+#logs
+logs/
+
+#data sets
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

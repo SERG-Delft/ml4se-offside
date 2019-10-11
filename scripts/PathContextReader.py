@@ -66,7 +66,7 @@ class PathContextReader:
         vocabs.path_vocab.get_word_to_index_lookup_table()
         vocabs.target_vocab.get_word_to_index_lookup_table()
 
-    #@tf.function
+    @tf.function
     def process_input_row(self, row_placeholder):
         parts = tf.io.decode_csv(
             row_placeholder, record_defaults=self.csv_record_defaults, field_delim=' ', use_quote_delim=False)
@@ -100,12 +100,9 @@ class PathContextReader:
         path_target_token_strings = tf.squeeze(
             tf.slice(dense_split_contexts, begin=[0, 2], size=[self.config.MAX_CONTEXTS, 1]), axis=1)  # (max_contexts,)
 
-        print(path_strings)
         path_source_token_indices = self.vocabs.token_vocab.lookup_index(path_source_token_strings)  # (max_contexts, )
         path_indices = self.vocabs.path_vocab.lookup_index(path_strings)  # (max_contexts, )
         path_target_token_indices = self.vocabs.token_vocab.lookup_index(path_target_token_strings)  # (max_contexts, )
-
-        print(path_indices)
 
         valid_word_mask_per_context_part = [
             tf.not_equal(path_source_token_indices,
