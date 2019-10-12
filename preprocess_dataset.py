@@ -28,7 +28,7 @@ def main():
     context_valid_masks = np.zeros([n_entries, n_paths])
     Y = np.zeros([n_entries, n_predictions])
 
-    for i, line in enumerate(read_dateset(dataset_path, add_padding=True)):
+    for i, line in enumerate(read_dataset(dataset_path, add_padding=True)):
         reader_output = predict_reader.process_input_row(tf.convert_to_tensor(line))
 
 
@@ -52,12 +52,12 @@ def main():
 
 def read_n_entries(path: str) -> int:
     i = 0
-    for _ in read_dateset(path, add_padding=False):
+    for _ in read_dataset(path, add_padding=False):
         i += 1
     return i
 
 
-def read_dateset(path: str, add_padding: bool = False):
+def read_dataset(path: str, add_padding: bool = False):
     with open(path) as f:
         for line in f:
             line = line.rstrip("\n")
