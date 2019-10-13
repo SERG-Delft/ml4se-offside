@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
 import JavaExtractor.Common.MethodExtractor;
+import JavaExtractor.Common.MethodMutator;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,11 +29,13 @@ public class ExtractFeaturesTask implements Callable<Void> {
 	CommandLineValues m_CommandLineValues;
 	Path filePath;
 	MethodExtractor methodExtractor;
+	MethodMutator methodMutator;
 
 	public ExtractFeaturesTask(CommandLineValues commandLineValues, Path path) {
 		m_CommandLineValues = commandLineValues;
 		this.filePath = path;
 		this.methodExtractor = new MethodExtractor();
+		this.methodMutator = new MethodMutator();
 	}
 
 	public ExtractFeaturesTask(CommandLineValues commandLineValues) {
@@ -121,17 +124,18 @@ public class ExtractFeaturesTask implements Callable<Void> {
 		try {
 			code = new String(Files.readAllBytes(this.filePath));
 			List<MethodDeclaration> methods = methodExtractor.extractMethodsFromCode(code);
+			FeatureExtractor featureExtractor = new FeatureExtractor(m_CommandLineValues);
 
+			ArrayList<ProgramFeatures> features = featureExtractor.extractFeatures(methodDeclarationsToString(methods));
+			features.forEach(programFeatures -> programFeatures.setName(this.filePath.toString() + ":" + programFeatures.getName()));
+
+			return features;
 		} catch (IOException e) {
 			e.printStackTrace();
 			code = Common.EmptyString;
 		}
-		FeatureExtractor featureExtractor = new FeatureExtractor(m_CommandLineValues);
 
-		ArrayList<ProgramFeatures> features = featureExtractor.extractFeatures(code);
-		features.forEach(programFeatures -> programFeatures.setName(this.filePath.toString() + ":" + programFeatures.getName()));
-
-		return features;
+		return new ArrayList<>();
 	}
 
 	public String featuresToString(ArrayList<ProgramFeatures> features) {
@@ -163,7 +167,7 @@ public class ExtractFeaturesTask implements Callable<Void> {
 		List<MethodDeclaration> methods = methodExtractor.extractMethodsFromCode(code);
 		List<MethodDeclaration> mutatedMethods = new ArrayList<>();
 		for (MethodDeclaration method : methods) {
-			mutatedMethods.add(methodExtractor.mutateMethod(method));
+			mutatedMethods.add(methodMutator.mutateMethod(method));
 		}
 
 		LinkedHashMap<String, List<MethodDeclaration>> methodsAndMutatedMethods = new LinkedHashMap<>();
