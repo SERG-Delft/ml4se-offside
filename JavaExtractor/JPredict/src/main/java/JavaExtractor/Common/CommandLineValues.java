@@ -33,6 +33,9 @@ public class CommandLineValues {
 	@Option(name = "--padding", required = false)
 	public boolean Padding = true;
 
+	@Option(name = "--evaluate", required = false)
+	public boolean Evaluate = false;
+
 	@Option(name = "--num_threads", required = false)
 	public int NumThreads = 32;
 

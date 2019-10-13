@@ -5,8 +5,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -52,7 +50,12 @@ public class ExtractFeaturesTask implements Callable<Void> {
 	public void processFile() {
 		ArrayList<ProgramFeatures> features;
 		try {
-			features = extractSingleFile();
+			if (m_CommandLineValues.Evaluate){
+				features = extractSingleFileForEvaluation();
+			} else {
+				features = extractSingleFileForTraining();
+			}
+
 		} catch (ParseException | IOException e) {
 			e.printStackTrace();
 			return;
@@ -87,7 +90,7 @@ public class ExtractFeaturesTask implements Callable<Void> {
 		}
 	}
 
-	public ArrayList<ProgramFeatures> extractSingleFile() throws ParseException, IOException {
+	public ArrayList<ProgramFeatures> extractSingleFileForTraining() throws ParseException, IOException {
 		String code = null;
 		String goodCode = null;
 		String badCode = null;
@@ -111,6 +114,24 @@ public class ExtractFeaturesTask implements Callable<Void> {
 		Stream.of(goodFeatures, badFeatures).forEach(allFeatures::addAll);
 
 		return allFeatures;
+	}
+
+	public ArrayList<ProgramFeatures> extractSingleFileForEvaluation() throws IOException, ParseException {
+		String code = null;
+		try {
+			code = new String(Files.readAllBytes(this.filePath));
+			List<MethodDeclaration> methods = methodExtractor.extractMethodsFromCode(code);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			code = Common.EmptyString;
+		}
+		FeatureExtractor featureExtractor = new FeatureExtractor(m_CommandLineValues);
+
+		ArrayList<ProgramFeatures> features = featureExtractor.extractFeatures(code);
+		features.forEach(programFeatures -> programFeatures.setName(this.filePath.toString()));
+
+		return features;
 	}
 
 	public String featuresToString(ArrayList<ProgramFeatures> features) {
