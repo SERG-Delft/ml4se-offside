@@ -129,7 +129,7 @@ public class ExtractFeaturesTask implements Callable<Void> {
 		FeatureExtractor featureExtractor = new FeatureExtractor(m_CommandLineValues);
 
 		ArrayList<ProgramFeatures> features = featureExtractor.extractFeatures(code);
-		features.forEach(programFeatures -> programFeatures.setName(this.filePath.toString()));
+		features.forEach(programFeatures -> programFeatures.setName(this.filePath.toString() + ":" + programFeatures.getName()));
 
 		return features;
 	}
