@@ -28,6 +28,7 @@ class Config:
         self.CUSTOM_MODEL_DIR = os.path.join(self.ROOT, "resources", "models", "custom", "model")
         self.MODEL_LOAD_PATH = os.path.join(self.ORIGINAL_MODEL_DIR, self.ORIGINAL_MODEL_NAME)
         self.VERBOSE_MODE: int = 1
+        self.TESTING_BUG_THRESHOLD: float = 0.7
 
     def __init__(self, set_defaults: bool = False):
 
@@ -52,6 +53,7 @@ class Config:
         self.MODEL_LOAD_PATH: Optional[str] = None
         self.VERBOSE_MODE: int = 0
         self.LOGS_PATH: Optional[str] = None
+        self.TESTING_BUG_THRESHOLD: float = 0
 
         self.__logger: Optional[logging.Logger] = None
 

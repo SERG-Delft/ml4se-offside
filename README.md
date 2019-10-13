@@ -47,6 +47,12 @@ Step 2: Run `ExtractWeightRealCode2Vec.py`. This scripts extrat the weights from
 The custom model can now be used in the any tf graph. 
 
 
+## Generating Test Data
+* If there is not one, create a folder called `data` in project root
+* Change paths in the command in next step
+* Run the command in `data` folder `java -cp ~/path/to/project/ML4SA/JavaExtractor/JPredict/target/JavaExtractor-0.0.2-SNAPSHOT.jar JavaExtractor.App --max_path_length 8 --max_path_width 2 --max_contexts 200 --dir path/to/java/project/ --evaluate > evaluate.txt`
+* If you have extracted the model properly in previous steps you can run main.py
+
 ##Setting up the original code2vec project.
 Run the following commands (best done in a venv):
 ```

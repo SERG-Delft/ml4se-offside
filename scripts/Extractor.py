@@ -10,7 +10,8 @@ class Extractor:
 
     def extract_paths(self, path):
         command = ['java', '-cp', self.jar_path, 'JavaExtractor.App', '--max_path_length',
-                   str(self.max_path_length), '--max_path_width', str(self.max_path_width), '--file', path, '--no_hash']
+                   str(self.max_path_length), '--max_path_width', str(self.max_path_width), '--file', path,
+                   '--no_hash', "--max_contexts", "200", "--evaluate"]
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = process.communicate()
         output = out.decode().splitlines()
@@ -20,6 +21,7 @@ class Extractor:
         hash_to_string_dict = {}
         result = []
         for i, line in enumerate(output):
+            line = line.rstrip("\n")
             parts = line.rstrip().split(' ')
             method_name = parts[0]
             current_result_line_parts = [method_name]

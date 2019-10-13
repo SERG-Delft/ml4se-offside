@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import tensorflow as tf
 
@@ -36,8 +38,6 @@ if __name__ == '__main__':
     #@tf.function # With this tf.functionn we stack the other tf.function such that they are combined into a single call graph on the gpu.
     def predict(line):
         # Extract numerical form suitable for model
-        print("line")
-        print(line)
         reader_output = predict_reader.process_input_row(line)
         inputs = [reader_output[1], reader_output[2], reader_output[3], tf.cast(reader_output[4], tf.float32)]
 
@@ -48,15 +48,17 @@ if __name__ == '__main__':
 
     try:
         # Generate raw input in string format method|name 1,2,3 ...,...,...
-        predict_lines, hash_to_string_dict = path_extractor.extract_paths(input_filename)
-        print("hash_to_string_dict")
-        print(hash_to_string_dict)
-        print("predict_lines")
-        print(predict_lines)
-        for line in predict_lines:
-            prediction = predict(line)
-            print(prediction)
+        path = os.path.join(os.path.dirname(__file__), "data", "evaluate.txt")
+        config.get_logger().info("Finding bugs from context path file: " + str(path))
+        config.get_logger().info("Threshold for bug finding is: " + str(config.TESTING_BUG_THRESHOLD))
+        config.get_logger().info("Please wait...")
+        with open(path) as f:
+            for line in f:
+                line = line.rstrip("\n")
+                prediction = predict(line)
+                if prediction.numpy()[0, 0] > config.TESTING_BUG_THRESHOLD:
+                    print("BUG HERE?")
+                    print("Method name: " + line.split(" ", 1)[0])
+                    print("Prediction: " + str(prediction.numpy()[0, 0]))
     except ValueError as e:
         print(e)
-
-
