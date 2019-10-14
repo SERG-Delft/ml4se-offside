@@ -7,6 +7,9 @@ logs/
 #data sets
 data/
 
+#PVS-Studio
+.PVS-Studio/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
