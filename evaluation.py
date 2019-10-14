@@ -20,7 +20,7 @@ if __name__ == '__main__':
     # Create a model
     code2vec = Code2VecCustomModel(config)
     model = CustomModel(code2vec)
-    model.load_weights("resources/models/custom3/model")
+    model.load_weights(config.CUSTOM_MODEL_WEIGHT_DIR)
 
     config.get_logger().info('Starting evaluation...')
     vocabs = Code2VecVocabs(config)
@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
 
     try:
-        path = os.path.join(os.path.dirname(__file__), "data", "evaluate.txt")
+        path = os.path.join(config.EVALUATION_DATA_PATH)
         config.get_logger().info("Finding bugs from context path file: " + str(path))
         config.get_logger().info("Threshold for bug finding is: " + str(config.TESTING_BUG_THRESHOLD))
         config.get_logger().info("Please wait...")

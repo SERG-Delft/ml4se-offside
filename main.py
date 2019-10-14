@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # Create a model
     code2vec = Code2VecCustomModel(config)
     model = CustomModel(code2vec)
-    model.load_weights("resources/models/custom3/model")
+    model.load_weights(config.CUSTOM_MODEL_WEIGHT_DIR)
 
 
     input_filename = 'Input.java'
