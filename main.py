@@ -22,7 +22,9 @@ if __name__ == '__main__':
     # Create a model
     code2vec = Code2VecCustomModel(config)
     model = CustomModel(code2vec)
-    model.load_weights("resources/models/custom3/model")
+    model.load_weights("resources/models/pre_trained/model")
+
+
 
 
     input_filename = 'Input.java'
@@ -33,7 +35,7 @@ if __name__ == '__main__':
                                        model_input_tensors_former=_TFEvaluateModelInputTensorsFormer(),
                                        config=config)
 
-    #@tf.function # With this tf.functionn we stack the other tf.function such that they are combined into a single call graph on the gpu.
+    @tf.function # With this tf.functionn we stack the other tf.function such that they are combined into a single call graph on the gpu.
     def predict(line):
         # Extract numerical form suitable for model
         print("line")
@@ -58,5 +60,8 @@ if __name__ == '__main__':
             print(prediction)
     except ValueError as e:
         print(e)
+
+    #print(code2vec.summary())
+    #print(model.summary())
 
 

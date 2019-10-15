@@ -12,7 +12,7 @@ from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_
 
 
 def main() -> None:
-    X_test, Y_test = load_data("data/test_")
+    X_test, Y_test = load_data("data/test_large_")
 
 
     config = Config(set_defaults=True)
@@ -20,7 +20,8 @@ def main() -> None:
 
 
     model = CustomModel(code2Vec)
-    model.load_weights("resources/models/custom3/model")
+    #model.load_weights("resources/models/pre_trained/model")
+    model.load_weights("resources/models/random_init/model")
     metrics = ['binary_accuracy']
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=metrics)
 
@@ -49,6 +50,7 @@ def main() -> None:
 
     print("recall_score")
     print(recall_score(Y_test, Y_pred))
+
 
 
 

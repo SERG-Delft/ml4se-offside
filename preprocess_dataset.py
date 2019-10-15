@@ -10,8 +10,8 @@ from utils.Vocabularies import Code2VecVocabs
 
 
 def main():
-    output_prefix = "test_"
-    dataset_path = "data/java-med-test.txt"
+    output_prefix = "test_large_"
+    dataset_path = "data/java-large-test.txt"
     n_paths = 200
     n_predictions = 1
     n_entries = read_n_entries(dataset_path)
@@ -28,7 +28,7 @@ def main():
     context_valid_masks = np.zeros([n_entries, n_paths])
     Y = np.zeros([n_entries, n_predictions])
 
-    for i, line in enumerate(read_dateset(dataset_path, padding=True)):
+    for i, line in enumerate(read_dateset(dataset_path)):
         reader_output = predict_reader.process_input_row(tf.convert_to_tensor(line))
 
 
@@ -52,19 +52,15 @@ def main():
 
 def read_n_entries(path: str) -> int:
     i = 0
-    for _ in read_dateset(path, padding=False):
+    for _ in read_dateset(path):
         i += 1
     return i
 
 
-def read_dateset(path: str, padding: bool = False):
+def read_dateset(path: str):
     with open(path) as f:
         for line in f:
-            line = line.rstrip()
-            if padding:
-                n_fields = line.count(" ")
-                if n_fields < 200:
-                    line = line + "".join([" " for _ in range(200 - n_fields)])
+            line = line.rstrip("\n")
             yield line
 
 
