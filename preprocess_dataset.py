@@ -45,7 +45,7 @@ def main():
     np.save(output_prefix + "path_idxs.npy", path_idxs)
     np.save(output_prefix + "path_target_token_idxs.npy", path_target_token_idxs)
     np.save(output_prefix + "context_valid_masks.npy", context_valid_masks)
-    np.save(output_prefix + "Y.npy", Y)
+    np.save(output_prefix + "train_Y.npy", Y)
 
 
 

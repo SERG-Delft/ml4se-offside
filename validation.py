@@ -20,8 +20,9 @@ def main() -> None:
 
 
     model = CustomModel(code2Vec)
+    model.load_weights("resources/models/frozen/model")
     #model.load_weights("resources/models/pre_trained/model")
-    model.load_weights("resources/models/random_init/model")
+    #model.load_weights("resources/models/random_init/model")
     metrics = ['binary_accuracy']
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=metrics)
 
