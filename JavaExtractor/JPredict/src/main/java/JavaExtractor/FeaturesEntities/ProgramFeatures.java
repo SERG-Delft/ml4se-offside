@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class ProgramFeatures {
 	private String name;
+	private String originalOperator;
 	CommandLineValues m_CommandLineValues;
 
 	private ArrayList<ProgramRelation> features = new ArrayList<>();
@@ -26,6 +27,7 @@ public class ProgramFeatures {
 
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append(name).append(" ");
+		stringBuilder.append(originalOperator).append(" ");
 		stringBuilder.append(features.stream().map(ProgramRelation::toString).limit(m_CommandLineValues.MaxContexts).collect(Collectors.joining(" ")));
 
 		if (m_CommandLineValues.Padding) {
@@ -56,6 +58,14 @@ public class ProgramFeatures {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getOriginalOperator() {
+		return originalOperator;
+	}
+
+	public void setOriginalOperator(String originalOperator) {
+		this.originalOperator = originalOperator;
 	}
 
 	public ArrayList<ProgramRelation> getFeatures() {
