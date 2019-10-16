@@ -1,5 +1,3 @@
-from collections import Iterator
-
 import tensorflow as tf
 import numpy as np
 
@@ -27,6 +25,7 @@ def main():
     path_target_token_idxs = np.zeros([n_entries, n_paths])
     context_valid_masks = np.zeros([n_entries, n_paths])
     Y = np.zeros([n_entries, n_predictions])
+
 
     for i, line in enumerate(read_dateset(dataset_path)):
         reader_output = predict_reader.process_input_row(tf.convert_to_tensor(line))
@@ -62,6 +61,7 @@ def read_dateset(path: str):
         for line in f:
             line = line.rstrip("\n")
             yield line
+
 
 
 if __name__ == '__main__':

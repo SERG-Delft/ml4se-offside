@@ -1,22 +1,9 @@
 # ML4SA
 
-## Current Progress
-We have extracted the code2vec model to generate vectors which our model will use. A small example can be seen 
-in the custom_code2vec branch. We plan to use theses vectors like described in DeepBugs paper (instead of generating
-vector from specific parts of code, we go for the whole method).
-  
-We are also working on generating a dataset. Currently we can produce code that mutates code regarding AND and OR
-statements. These are in turn made into ContextPaths (that is readable by code2vec). The code is currently in 
-JavaExtractor branch.
-
 ## Description: 
-<<<<<<< HEAD
-Replicate the Deep Bugs paper covered in the first lecture and combine it with Code2VecCustomModel and explore the benefits of other NN architectures. We plan on picking 2-3 types of bugs and create a model that can indicate how likely a piece of code (single function) is to contain any of those bugs. The bugs we are currently looking at are:
-=======
 Replicate the Deep Bugs paper covered in the first lecture and combine it with Code2Vec and explore the benefits of 
 other NN architectures. We plan on picking 2-3 types of bugs and create a model that can indicate how likely a piece 
 of code (single function) is to contain any of those bugs. The bugs we are currently looking at are:
->>>>>>> master
 
 - Missing/unnecessary negation
 - Mixed and/or operators
@@ -36,7 +23,6 @@ The input to the model would be an AST of a single function and the output would
 ## Sources: 
 - Pradel, M., & Sen, K. (2018). DeepBugs: A learning approach to name-based bug detection. Proceedings of the ACM on Programming Languages, 2 (OOPSLA), 147.
 
-<<<<<<< HEAD
 ##Data collection: 
 Use already parsed and validated trees from https://github.com/src-d/awesome-machine-learning-on-source-code#datasets and assume them to contain "correct code". We then generate negative examples by removing, adding or changing respective nodes in the trees.
 
@@ -61,6 +47,12 @@ Step 2: Run `ExtractWeightRealCode2Vec.py`. This scripts extrat the weights from
 The custom model can now be used in the any tf graph. 
 
 
+## Generating Test Data
+* If there is not one, create a folder called `data` in project root
+* Change paths in the command in next step
+* Run the command in `data` folder `java -cp ~/path/to/project/JavaExtractor/JPredict/target/JavaExtractor-0.0.2-SNAPSHOT.jar JavaExtractor.App --max_path_length 8 --max_path_width 2 --max_contexts 200 --dir path/to/java/project/ --evaluate > evaluate.txt`
+* If you have extracted the model properly in previous steps you can run main.py
+
 ##Setting up the original code2vec project.
 Run the following commands (best done in a venv):
 ```
@@ -79,9 +71,9 @@ wget https://s3.amazonaws.com/code2vec/model/java14m_model_trainable.tar.gz
 tar -xvzf java14m_model_trainable.tar
 ```
 
-And finaly you can run the model using:
+And finally you can run the model using:
 `python code2vec.py --load models/java14m_trainable/saved_model_iter8 --predict`
-=======
+
 ## Data collection: 
 Use already parsed and validated trees from https://github.com/src-d/awesome-machine-learning-on-source-code#datasets and assume them to contain "correct code". We then generate negative examples by removing, adding or changing respective nodes in the trees.
->>>>>>> master
+

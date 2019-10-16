@@ -9,8 +9,6 @@ from scripts.PathContextReader import PathContextReader
 from utils.Vocabularies import Code2VecVocabs
 
 
-
-
 if __name__ == '__main__':
     config = Config(set_defaults=True)
 
@@ -23,8 +21,6 @@ if __name__ == '__main__':
     code2vec = Code2VecCustomModel(config)
     model = CustomModel(code2vec)
     model.load_weights("resources/models/pre_trained/model")
-
-
 
 
     input_filename = 'Input.java'
@@ -49,7 +45,6 @@ if __name__ == '__main__':
 
 
     try:
-        # Generate raw input in string format method|name 1,2,3 ...,...,...
         predict_lines, hash_to_string_dict = path_extractor.extract_paths(input_filename)
         print("hash_to_string_dict")
         print(hash_to_string_dict)
@@ -57,11 +52,8 @@ if __name__ == '__main__':
         print(predict_lines)
         for line in predict_lines:
             prediction = predict(line)
-            print(prediction)
+            # Probability of code containing a bug
+            print("Prediction: " + str(prediction.numpy()[0,0]))
     except ValueError as e:
         print(e)
-
-    #print(code2vec.summary())
-    #print(model.summary())
-
 

@@ -7,11 +7,17 @@ logs/
 #data sets
 data/
 
+#PVS-Studio
+.PVS-Studio/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# IntelliJ files
 .idea
+*.iml
 
 # C extensions
 *.so

@@ -23,11 +23,14 @@ class Config:
 
         self.ROOT = os.path.dirname(__file__)
         self.EXTRACTOR_JAR_PATH = os.path.join(self.ROOT, "jars", "JavaExtractor-0.0.2-SNAPSHOT.jar")
+        self.EVALUATION_DATA_PATH = os.path.join(self.ROOT, "data", "evaluate.txt")
         self.ORIGINAL_MODEL_DIR = os.path.join(self.ROOT, "resources", "models", "java14m_trainable")
         self.ORIGINAL_MODEL_NAME = "saved_model_iter8"
         self.CUSTOM_MODEL_DIR = os.path.join(self.ROOT, "resources", "models", "custom", "model")
+        self.CUSTOM_MODEL_WEIGHT_DIR = os.path.join(self.ROOT, "resources", "models", "custom3", "model")
         self.MODEL_LOAD_PATH = os.path.join(self.ORIGINAL_MODEL_DIR, self.ORIGINAL_MODEL_NAME)
         self.VERBOSE_MODE: int = 1
+        self.TESTING_BUG_THRESHOLD: float = 0.7
 
     def __init__(self, set_defaults: bool = False):
 
@@ -46,12 +49,15 @@ class Config:
 
         self.ROOT: Optional[str] = None
         self.EXTRACTOR_JAR_PATH: Optional[str] = None
+        self.EVALUATION_DATA_PATH: Optional[str] = None
         self.ORIGINAL_MODEL_DIR: Optional[str] = None
         self.ORIGINAL_MODEL_NAME: Optional[str] = None
         self.CUSTOM_MODEL_DIR: Optional[str] = None
+        self.CUSTOM_MODEL_WEIGHT_DIR: Optional[str] = None
         self.MODEL_LOAD_PATH: Optional[str] = None
         self.VERBOSE_MODE: int = 0
         self.LOGS_PATH: Optional[str] = None
+        self.TESTING_BUG_THRESHOLD: float = 0
 
         self.__logger: Optional[logging.Logger] = None
 
