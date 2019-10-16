@@ -25,22 +25,21 @@ class Code2VecEmbedding(tf.keras.Model):
 
     def call(
             self,
-            inputs: Tuple[GraphInput, GraphInput, GraphInput, GraphInput],
+            inputs: Tuple[GraphInput, GraphInput, GraphInput],
             **kwargs
     ) -> tf.Tensor:
-        path_source_token_idxs, path_idxs, path_target_token_idxs, context_valid_masks = inputs
+        path_source_token_idxs, path_idxs, path_target_token_idxs = inputs
 
         batch_size = path_source_token_idxs.shape[0]
 
         assert batch_size == path_idxs.shape[0]
         assert batch_size == path_target_token_idxs.shape[0]
-        assert batch_size == context_valid_masks.shape[0]
 
         source_word_embed = self.token_embedding_layer(path_source_token_idxs)
         _assert_shape(source_word_embed, [batch_size, self.config.MAX_CONTEXTS, self.config.TOKEN_EMBEDDINGS_SIZE])
-        path_embed = self.path_embedding_layer(path_idxs)
+        path_embed = self.path_embedding_layer(path_idxs, **kwargs)
         _assert_shape(path_embed, [batch_size, self.config.MAX_CONTEXTS, self.config.PATH_EMBEDDINGS_SIZE])
-        target_word_embed = self.token_embedding_layer(path_target_token_idxs)
+        target_word_embed = self.token_embedding_layer(path_target_token_idxs, **kwargs)
         _assert_shape(target_word_embed, [batch_size, self.config.MAX_CONTEXTS, self.config.TOKEN_EMBEDDINGS_SIZE])
 
         context_embed = tf.concat([source_word_embed, path_embed, target_word_embed], axis=-1)

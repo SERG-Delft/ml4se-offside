@@ -11,7 +11,7 @@ from models.CustomModel import CustomModel
 
 def main() -> None:
     batch_size = 1024 * 4
-    output_path = os.path.join(os.path.dirname(__file__), "resources", "models", "frozen", "model")
+    output_path = os.path.join(os.path.dirname(__file__), "resources", "models", "random_init", "model")
     X_train, Y_train = load_data("train_large_")
     X_val, Y_val = load_data("val_large_")
 
@@ -19,8 +19,8 @@ def main() -> None:
     config = Config(set_defaults=True)
     code2Vec = Code2VecCustomModel(config)
     code2Vec.load_weights("resources/models/custom/model")
-    code2Vec.token_embedding_layer.trainable = False
-    code2Vec.path_embedding_layer.trainable = False
+    #code2Vec.token_embedding_layer.trainable = False
+    #code2Vec.path_embedding_layer.trainable = False
 
     model = CustomModel(code2Vec)
     metrics = ['binary_accuracy']
@@ -29,8 +29,8 @@ def main() -> None:
 
 
     callbacks = []
-    callbacks.append(tf.keras.callbacks.EarlyStopping(monitor='val_binary_accuracy', min_delta=0, patience=1, restore_best_weights=True))
-    callbacks.append(tf.keras.callbacks.ModelCheckpoint(filepath=output_path, save_weights_only=True, save_best_only=True, monitor='val_binary_accuracy'))
+    callbacks.append(tf.keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=1, restore_best_weights=True))
+    callbacks.append(tf.keras.callbacks.ModelCheckpoint(filepath=output_path, save_weights_only=True, save_best_only=True, monitor='val_loss'))
 
     
     model.fit(X_train, Y_train, validation_data=[X_val, Y_val], epochs=100, batch_size=batch_size, callbacks=callbacks)

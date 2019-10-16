@@ -43,6 +43,7 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         k = self.split_heads(k, batch_size)  # (batch_size, num_heads, seq_len_k, depth)
         v = self.split_heads(v, batch_size)  # (batch_size, num_heads, seq_len_v, depth)
 
+        mask = tf.expand_dims(mask, axis=1)
         scaled_attention = self.attentation([q, v, k], [mask, mask]) #(batch_size, num_heads, seq_len_q, depth)
 
         scaled_attention = tf.transpose(scaled_attention, perm=[0, 2, 1, 3])  # (batch_size, seq_len_q, num_heads, depth)
@@ -68,7 +69,8 @@ class EncoderLayer(tf.keras.layers.Layer):
         self.dropout1 = tf.keras.layers.Dropout(rate)
         self.dropout2 = tf.keras.layers.Dropout(rate)
 
-    def call(self, x, mask, **kwargs):
+    def call(self, inputs, **kwargs):
+        x, mask = inputs
         attn_output = self.mha(x, x, x, mask)  # (batch_size, input_seq_len, d_model)
         attn_output = self.dropout1(attn_output, **kwargs) # (batch_size, input_seq_len, d_model)
         out1 = self.layernorm1(x + attn_output)  # (batch_size, input_seq_len, d_model)
@@ -84,8 +86,8 @@ class EncoderLayer(tf.keras.layers.Layer):
 
 if __name__ == '__main__':
     config = Config(set_defaults=True)
-    #embedding = np.ones(shape=[1, config.MAX_CONTEXTS, config.CODE_VECTOR_SIZE,], dtype=np.float32) # (batch, max_contexts)
-    #masks = np.ones(shape=[1, config.MAX_CONTEXTS,], dtype=np.float32) == 1  # (batch, max_contexts)
+    ex_embedding = np.ones(shape=[10, config.MAX_CONTEXTS, config.CODE_VECTOR_SIZE,], dtype=np.float32) # (batch, max_contexts)
+    ex_masks = np.ones(shape=[10, config.MAX_CONTEXTS,], dtype=np.float32) == 1  # (batch, max_contexts)
     embedding = tf.keras.layers.Input(shape=[config.MAX_CONTEXTS, config.CODE_VECTOR_SIZE,], dtype=tf.float32)
     masks = tf.keras.Input(shape=[config.MAX_CONTEXTS, ], dtype=tf.bool)
     #masks[0][-1] = False
@@ -95,8 +97,9 @@ if __name__ == '__main__':
     encoder1 = EncoderLayer(d_model=config.CODE_VECTOR_SIZE, dff=4 * config.CODE_VECTOR_SIZE, num_heads=8, rate=0.1)
     encoder2 = EncoderLayer(d_model=config.CODE_VECTOR_SIZE, dff=4 * config.CODE_VECTOR_SIZE, num_heads=8, rate=0.1)
 
-    out1 = encoder1(embedding, masks)
-    out2 = encoder2(out1, masks)
+    out1 = encoder1([embedding, masks])
+    out2 = encoder2([out1, masks])
     model = tf.keras.Model(inputs=[embedding, masks], outputs=out2)
-    print(model.summary())
+    #print(model.summary())
+    print(model([ex_embedding, ex_masks]))
     
