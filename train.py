@@ -11,22 +11,21 @@ from models.CustomModel import CustomModel
 
 def main() -> None:
     batch_size = 1024 * 4
-    output_path = os.path.join(os.path.dirname(__file__), "resources", "models", "random_init", "model")
-    X_train, Y_train = load_data("train_large_")
-    X_val, Y_val = load_data("val_large_")
+    output_path = os.path.join(os.path.dirname(__file__), "resources", "models", "pre_trained_if", "model")
+    X_train, Y_train = load_data("training_if_large_")
+    X_val, Y_val = load_data("val_if_large_")
 
 
     config = Config(set_defaults=True)
     code2Vec = Code2VecCustomModel(config)
     code2Vec.load_weights("resources/models/custom/model")
-    #code2Vec.token_embedding_layer.trainable = False
-    #code2Vec.path_embedding_layer.trainable = False
+    code2Vec.token_embedding_layer.trainable = False
+    code2Vec.path_embedding_layer.trainable = False
 
     model = CustomModel(code2Vec)
     metrics = ['binary_accuracy']
     optimizer = tf.keras.optimizers.Adam()
     model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=metrics)
-
 
     callbacks = []
     callbacks.append(tf.keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=1, restore_best_weights=True))

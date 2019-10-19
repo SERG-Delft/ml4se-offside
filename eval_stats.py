@@ -7,6 +7,7 @@ from scripts.PathContextReader import PathContextReader
 from utils.Vocabularies import Code2VecVocabs
 import tensorflow as tf
 import csv
+import re
 
 class ConfustionMatrix(object):
     def __init__(self):
@@ -56,8 +57,9 @@ class ConfustionMatrix(object):
 
 
 def main():
-    dataset_path = "data/java-large-test-stats.txt"
+    dataset_path = "data/java-large-test-IFonly.txt"
     threshold = 0.5
+    combine_sub_cats = False
 
     config = Config(set_defaults=True)
     vocabs = Code2VecVocabs(config)
@@ -68,9 +70,10 @@ def main():
     code2vec = Code2VecCustomModel(config)
     model = CustomModel(code2vec)
     model.load_weights("resources/models/pre_trained/model")
-    model.compile(loss='binary_crossentropy', optimizer='adam')
+    # model.load_weights("resources/models/pre_trained_if0/model")
     #model.load_weights("resources/models/frozen/model")
     #model.load_weights("resources/models/random_init/model")
+    model.compile(loss='binary_crossentropy', optimizer='adam')
 
     results = defaultdict(ConfustionMatrix)
 
@@ -87,15 +90,17 @@ def main():
         return Y_predict, Y
 
 
-    for i, data in enumerate(read_dateset(dataset_path)):
-        type, line = data
+    for i, data in enumerate(read_dateset(dataset_path, combine_sub_cats=combine_sub_cats)):
+        types, line = data
+
         Y_predict, Y = validate_line(tf.convert_to_tensor(line))
         Y = Y.numpy()
         Y_predict = Y_predict.numpy()
         Y_predict = 1.0 if Y_predict >= threshold else 0.0
-        results[type].add(Y_predict, Y)
+        for type in types:
+            results[type].add(Y_predict, Y)
 
-        if i % 10000 == 0:
+        if i % 1000 == 0:
             print(f"Step[{i}]")
 
     with open('data/stats.csv', 'w', newline='') as result_file:
@@ -104,16 +109,64 @@ def main():
             data = [type, str(matrix.tp), str(matrix.tn), str(matrix.fp), str(matrix.fn)]
             wr.writerow(data)
 
-def read_dateset(path: str):
+def read_dateset(path: str, combine_sub_cats: bool = False):
     with open(path) as f:
         for line in f:
             line = line.rstrip("\n")
-            type, data = line.split(maxsplit=1)
-            if type == "NoBug":
-                data = "1 " + data
-            else:
+            types, data = line.split(maxsplit=1)
+            types = list(filter(lambda x : len(x) > 0, types.split("#")))
+            if "NoBug" in types:
+                types = types[1:]
                 data = "0 " + data
-            yield type, data
+            else:
+                data = "1 " + data
+                types = list(map(map_to_oposite_sign, types))
+
+            if combine_sub_cats:
+                types = list(map(map_sub_catagory, types))
+            yield types, data
+
+def map_to_oposite_sign(cat: str) -> str:
+    if cat.endswith("greaterEquals"):
+        return cat.replace("greaterEquals", "greater")
+    if cat.endswith("greater"):
+        return cat.replace("greater", "greaterEquals")
+    if cat.endswith("lessEquals"):
+        return cat.replace("lessEquals", "less")
+    if cat.endswith("less"):
+        return cat.replace("less", "lessEquals")
+    raise Exception(f"Unknown cat={cat}")
+
+
+def map_sub_catagory(cat: str) -> str:
+    if cat.startswith("NoBug"):
+        return "NoBug"
+    if cat.startswith("FOR"):
+        return "FOR"
+    if cat.startswith("WHILE"):
+        return "WHILE"
+    if cat.startswith("TERNARY"):
+        return "TERNARY"
+    if cat.startswith("IF"):
+        return "IF"
+    if cat.startswith("RETURN"):
+        return "RETURN"
+    if cat.startswith("METHOD"):
+        return "METHOD"
+    if cat.startswith("DO"):
+        return "DO"
+    if cat.startswith("ASSIGN"):
+        return "ASSIGN"
+    if cat.startswith("ASSERT"):
+        return "ASSERT"
+    if cat.startswith("VARIABLEDECLARATOR"):
+        return "VARIABLEDECLARATOR"
+    if cat.startswith("OBJECTCREATION"):
+        return "OBJECTCREATION"
+    if cat.startswith("EXPRESSION"):
+        return "EXPRESSION"
+    raise Exception(f"Unknown mapping cat={cat}")
+
 
 if __name__ == '__main__':
     main()

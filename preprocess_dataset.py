@@ -8,8 +8,8 @@ from utils.Vocabularies import Code2VecVocabs
 
 
 def main():
-    output_prefix = "test_large_"
-    dataset_path = "data/java-large-test.txt"
+    output_prefix = "test_if_large_"
+    dataset_path = "data/java-large-test-IFonly.txt"
     n_paths = 200
     n_predictions = 1
     n_entries = read_n_entries(dataset_path)
@@ -37,6 +37,7 @@ def main():
         context_valid_masks[i] = tf.cast(reader_output[4][0], tf.float32).numpy()
         Y[i] = tf.strings.to_number(reader_output[0]).numpy()
 
+
         if i % 1000 == 0:
             print(f"{i}/{n_entries}")
 
@@ -44,7 +45,7 @@ def main():
     np.save(output_prefix + "path_idxs.npy", path_idxs)
     np.save(output_prefix + "path_target_token_idxs.npy", path_target_token_idxs)
     np.save(output_prefix + "context_valid_masks.npy", context_valid_masks)
-    np.save(output_prefix + "train_Y.npy", Y)
+    np.save(output_prefix + "Y.npy", Y)
 
 
 
@@ -60,7 +61,12 @@ def read_dateset(path: str):
     with open(path) as f:
         for line in f:
             line = line.rstrip("\n")
-            yield line
+            types, data = line.split(maxsplit=1)
+            if "NoBug" in types or "0" in types:
+                data = "0 " + data
+            else:
+                data = "1 " + data
+            yield data
 
 
 

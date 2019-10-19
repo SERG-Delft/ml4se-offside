@@ -9,14 +9,16 @@ from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_
 
 
 def main() -> None:
-    X_test, Y_test = load_data("data/test_large_")
+    X_test, Y_test = load_data("data/test_if_large_")
 
     config = Config(set_defaults=True)
     code2Vec = Code2VecCustomModel(config)
 
     model = CustomModel(code2Vec)
-    model.load_weights("resources/models/frozen/model")
+    #model.load_weights("resources/models/frozen/model")
     #model.load_weights("resources/models/pre_trained/model")
+    model.load_weights("resources/models/pre_trained/model")
+    #model.load_weights("resources/models/pre_trained_if0/model")
     #model.load_weights("resources/models/random_init/model")
     metrics = ['binary_accuracy']
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=metrics)
