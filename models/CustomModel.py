@@ -1,7 +1,7 @@
-from abc import ABC, abstractmethod
-from typing import List, Set, Dict, Tuple, Optional, Union, Any, cast
+from typing import Tuple
 import tensorflow as tf
 
+from models.Code2Vec import Code2Vec
 from models.Code2VecCustomModel import Code2VecCustomModel
 from utils.Types import GraphInput
 

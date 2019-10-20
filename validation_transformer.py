@@ -1,7 +1,14 @@
+import os
+
 import numpy as np
+import tensorflow as tf
 
 from Config import Config
+from models.Code2Vec import Code2Vec
+from models.Code2VecAttention import Code2VecAttention
 from models.Code2VecCustomModel import Code2VecCustomModel
+from models.Code2VecEmbedding import Code2VecEmbedding
+from models.Code2VecTransformerBased import Code2VecTransformerBased
 from models.CustomModel import CustomModel
 
 from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
@@ -9,21 +16,21 @@ from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_
 
 
 def main() -> None:
-    X_test, Y_test = load_data("data/test_if_large_")
+    X_test, Y_test = load_data("data/test_large_")
+
 
     config = Config(set_defaults=True)
-    code2Vec = Code2VecCustomModel(config)
-
-    model = CustomModel(code2Vec)
-    #model.load_weights("resources/models/frozen/model")
+    #code2Vec = Code2VecCustomModel(config)
+    code2vec_emb = Code2VecEmbedding(config)
+    code2vec_att = Code2VecAttention(config)
+    model = Code2VecTransformerBased(config, code2vec_emb, code2vec_att)
+    model.load_weights("resources/models/transformer/model")
     #model.load_weights("resources/models/pre_trained/model")
-    model.load_weights("resources/models/pre_trained/model")
-    #model.load_weights("resources/models/pre_trained_if0/model")
     #model.load_weights("resources/models/random_init/model")
     metrics = ['binary_accuracy']
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=metrics)
 
-    batch_size = 1024 * 4
+    batch_size = 512
 
     test_loss, accuracy = model.evaluate(X_test, Y_test, batch_size=batch_size)
 
@@ -48,6 +55,9 @@ def main() -> None:
 
     print("recall_score")
     print(recall_score(Y_test, Y_pred))
+
+
+
 
 
 def load_data(prefix):

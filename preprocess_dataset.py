@@ -1,5 +1,3 @@
-from collections import Iterator
-
 import tensorflow as tf
 import numpy as np
 
@@ -10,8 +8,8 @@ from utils.Vocabularies import Code2VecVocabs
 
 
 def main():
-    output_prefix = "test_"
-    dataset_path = "data/java-med-test.txt"
+    output_prefix = "test_if_large_"
+    dataset_path = "data/java-large-test-IFonly.txt"
     n_paths = 200
     n_predictions = 1
     n_entries = read_n_entries(dataset_path)
@@ -28,7 +26,8 @@ def main():
     context_valid_masks = np.zeros([n_entries, n_paths])
     Y = np.zeros([n_entries, n_predictions])
 
-    for i, line in enumerate(read_dataset(dataset_path, add_padding=True)):
+
+    for i, line in enumerate(read_dateset(dataset_path)):
         reader_output = predict_reader.process_input_row(tf.convert_to_tensor(line))
 
 
@@ -37,6 +36,7 @@ def main():
         path_target_token_idxs[i] = reader_output[3][0].numpy()
         context_valid_masks[i] = tf.cast(reader_output[4][0], tf.float32).numpy()
         Y[i] = tf.strings.to_number(reader_output[0]).numpy()
+
 
         if i % 1000 == 0:
             print(f"{i}/{n_entries}")
@@ -52,21 +52,22 @@ def main():
 
 def read_n_entries(path: str) -> int:
     i = 0
-    for _ in read_dataset(path, add_padding=False):
+    for _ in read_dateset(path):
         i += 1
     return i
 
 
-def read_dataset(path: str, add_padding: bool = False):
+def read_dateset(path: str):
     with open(path) as f:
         for line in f:
             line = line.rstrip("\n")
-            if add_padding:
-                line = line.rstrip()
-                n_fields = line.count(" ")
-                if n_fields < 200:
-                    line = line + "".join([" " for _ in range(200 - n_fields)])
-            yield line
+            types, data = line.split(maxsplit=1)
+            if "NoBug" in types or "0" in types:
+                data = "0 " + data
+            else:
+                data = "1 " + data
+            yield data
+
 
 
 if __name__ == '__main__':

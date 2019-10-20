@@ -43,7 +43,7 @@ class Code2VecCustomModel(tf.keras.Model):
     """
     def __init__(
             self,
-            config,
+            config: Config,
             **kwargs
     ) -> None:
         self.config = config
