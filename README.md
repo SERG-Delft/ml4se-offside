@@ -1,14 +1,14 @@
-# Using Distributed Representation of Code for Bug Detection :blue_book: :mortar_board:
+# Using Distributed Representation of Code for Bug Detection :blue_book:
 
 ## Description: :newspaper:
 The aim of this project is to use [Code2Vec](www.code2vec.org) model and replace the final layer used for method naming 
 with a layer for bug detection. More specifically, we train the new model to detect 
 [off-by-one](https://en.wikipedia.org/wiki/Off-by-one_error) errors. 
 
-##Data collection: :floppy_disk:
+## Data collection: :floppy_disk:
 @TODO 
 
-##Setting up env: :clipboard:
+## Setting up env: :clipboard:
 * Install [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/)
 * Create a new environment:  
 
@@ -20,7 +20,7 @@ with a layer for bug detection. More specifically, we train the new model to det
 
 `tensorflow-gpu==2.0.0-rc1` with `tensorflow==2.0.0-rc1`.
   
-##Extracting custom code2vec model from the original weights:
+## Extracting custom code2vec model from the original weights:
 * Download the [pre-trained model](`https://s3.amazonaws.com/code2vec/model/java14m_model_trainable.tar.gz`).
 * Make sure this is the trainable model. 
 * Unzip this folder in the `resources` folder in project root.
