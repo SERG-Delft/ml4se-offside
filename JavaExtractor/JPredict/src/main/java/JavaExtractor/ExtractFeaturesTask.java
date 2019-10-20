@@ -5,21 +5,18 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.stream.Stream;
 
-import JavaExtractor.Common.MethodExtractor;
-import JavaExtractor.Common.MethodMutator;
+import JavaExtractor.Common.*;
+import JavaExtractor.Common.Statistics.ContainingNode;
+import JavaExtractor.Common.Statistics.OperatorType;
+import JavaExtractor.FeaturesEntities.ExtractedMethod;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.javaparser.ParseException;
 
-import JavaExtractor.Common.CommandLineValues;
-import JavaExtractor.Common.Common;
 import JavaExtractor.FeaturesEntities.ProgramFeatures;
 
 public class ExtractFeaturesTask implements Callable<Void> {
@@ -93,30 +90,36 @@ public class ExtractFeaturesTask implements Callable<Void> {
 		}
 	}
 
-	public ArrayList<ProgramFeatures> extractSingleFileForTraining() throws ParseException, IOException {
-		String code = null;
-		String goodCode = null;
-		String badCode = null;
+	public ArrayList<ProgramFeatures> extractSingleFileForTraining() {
 		try {
-			code = new String(Files.readAllBytes(this.filePath));
-			LinkedHashMap<String, List<MethodDeclaration>> goodAndMutatedMethods = getGoodAndMutatedMethods(code);
-			goodCode = methodDeclarationsToString(goodAndMutatedMethods.get("0"));
-			badCode = methodDeclarationsToString(goodAndMutatedMethods.get("1"));
-		} catch (IOException e) {
+            FeatureExtractor featureExtractor = new FeatureExtractor(m_CommandLineValues);
+			String code = new String(Files.readAllBytes(this.filePath));
+			List<MethodDeclaration> methods = methodExtractor.extractMethodsFromCode(code);
+			if (methods.size() == 0) return null;
+
+			List<ExtractedMethod> allMethods = new ArrayList<>();
+			for (MethodDeclaration method: methods) {
+				allMethods.addAll(methodMutator.processMethod(method));
+			}
+            updateCounters(allMethods);
+
+			ArrayList<ProgramFeatures> allFeatures = new ArrayList<>();
+
+			for (ExtractedMethod extractedMethod: allMethods) {
+                ArrayList<ProgramFeatures> features = featureExtractor.extractFeatures(extractedMethod.getMethod().toString());
+                features.forEach(feature -> {
+                    feature.setName(extractedMethod.getContainingNode());
+                    feature.setOriginalOperator(extractedMethod.getOriginalOperator());
+                });
+                allFeatures.addAll(features);
+			}
+			return allFeatures;
+
+		} catch (Exception e) {
 			e.printStackTrace();
-			code = Common.EmptyString;
 		}
-		FeatureExtractor featureExtractor = new FeatureExtractor(m_CommandLineValues);
 
-		ArrayList<ProgramFeatures> goodFeatures = featureExtractor.extractFeatures(goodCode);
-		goodFeatures.forEach(programFeatures -> programFeatures.setName(GOOD_CODE_NAME));
-		ArrayList<ProgramFeatures> badFeatures = featureExtractor.extractFeatures(badCode);
-		badFeatures.forEach(programFeatures -> programFeatures.setName(BAD_CODE_NAME));
-
-		ArrayList<ProgramFeatures> allFeatures = new ArrayList<>();
-		Stream.of(goodFeatures, badFeatures).forEach(allFeatures::addAll);
-
-		return allFeatures;
+        return null;
 	}
 
 	public ArrayList<ProgramFeatures> extractSingleFileForEvaluation() throws IOException, ParseException {
@@ -162,21 +165,6 @@ public class ExtractFeaturesTask implements Callable<Void> {
 		return StringUtils.join(methodsOutputs, "\n");
 	}
 
-	private LinkedHashMap<String, List<MethodDeclaration>> getGoodAndMutatedMethods(String code) {
-
-		List<MethodDeclaration> methods = methodExtractor.extractMethodsFromCode(code);
-		List<MethodDeclaration> mutatedMethods = new ArrayList<>();
-		for (MethodDeclaration method : methods) {
-			mutatedMethods.add(methodMutator.mutateMethod(method));
-		}
-
-		LinkedHashMap<String, List<MethodDeclaration>> methodsAndMutatedMethods = new LinkedHashMap<>();
-		methodsAndMutatedMethods.put("0", methods);
-		methodsAndMutatedMethods.put("1", mutatedMethods);
-
-		return methodsAndMutatedMethods;
-	}
-
 	private String methodDeclarationsToString(List<MethodDeclaration> methodDeclarations) {
 		StringWriter stringWriter = new StringWriter();
 		PrintWriter writer = new PrintWriter(stringWriter, true);
@@ -185,4 +173,25 @@ public class ExtractFeaturesTask implements Callable<Void> {
 		}
 		return stringWriter.toString();
 	}
+
+	private void updateCounters(List<ExtractedMethod> allMethods) {
+        for (OperatorType.Type operatorType: OperatorType.Type.values()) {
+        	long count = allMethods.stream()
+					.filter(em -> em.getOriginalOperator().equals(operatorType.name()))
+					.count();
+        	if (count > 0) App.incrementOperatorType(operatorType.name(), count);
+        }
+        for (ContainingNode containingNode: ContainingNode.values()) {
+        	long count = allMethods.stream()
+					.filter(em -> em.getContainingNode().equals(containingNode.toString()))
+					.count();
+        	if (count > 0) App.incrementInputCategory(containingNode.toString(), count);
+        }
+
+		long count = allMethods.stream()
+				.filter(em -> em.getContainingNode().equals(App.noBugString))
+				.count();
+		if (count > 0) App.incrementInputCategory(App.noBugString, count);
+
+    }
 }
