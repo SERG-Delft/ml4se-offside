@@ -19,34 +19,41 @@ public class MethodMutator {
 
     public List<ExtractedMethod> processMethod(MethodDeclaration method) {
         List<ExtractedMethod> extractedMethods = new ArrayList<>();
-        extractedMethods.add(new ExtractedMethod(method, "", App.noBugString));
-        List<BinaryExpr> allMutationCandidates = method.getNodesByType(BinaryExpr.class).stream()
-                .filter(containsOffByOne())
-                .collect(Collectors.toList());
+        StringBuilder mutatedNodes = new StringBuilder("#");
+
         
         for (ContainingNode containingNode : ContainingNode.values()) {
+            MethodDeclaration mutatedMethod = (MethodDeclaration) method.clone();
+            List<BinaryExpr> allMutationCandidates = mutatedMethod.getNodesByType(BinaryExpr.class).stream()
+                    .filter(containsOffByOne())
+                    .collect(Collectors.toList());
             List<BinaryExpr> mutationCandidatesForCategory = allMutationCandidates.stream()
                     .filter(SearchUtils.isContainedBy(containingNode.getNodeClass()))
                     .collect(Collectors.toList());
             if (mutationCandidatesForCategory.size() != 0) {
-                extractedMethods.add(mutateMethod(method, mutationCandidatesForCategory, containingNode.toString()));
+                ExtractedMethod extractedMethod = mutateMethod(mutatedMethod, mutationCandidatesForCategory, containingNode.toString());
+                extractedMethods.add(extractedMethod);
+                mutatedNodes.append(containingNode.toString()).append(extractedMethod.getOriginalOperator()).append("#");
             }
-            allMutationCandidates.removeAll(mutationCandidatesForCategory);
+//            allMutationCandidates.removeAll(mutationCandidatesForCategory);
         }
 
-        printCandidatesNotConsidered(method, allMutationCandidates);
+        if  (extractedMethods.size() != 0) {
+            extractedMethods.add(new ExtractedMethod(method, mutatedNodes.toString(), App.noBugString));
+        }
+
+//        printCandidatesNotConsidered(method, allMutationCandidates);
         
         return extractedMethods;
     }
     
     private ExtractedMethod mutateMethod(MethodDeclaration method, List<BinaryExpr> mutationCandidates, String containingNode) {
-        MethodDeclaration mutatedMethod = (MethodDeclaration) method.clone();
 
         int mutationIndex = rand.nextInt(mutationCandidates.size());
         String operator = mutateExpression(mutationCandidates.get(mutationIndex));
 
 
-        return new ExtractedMethod(mutatedMethod, operator, containingNode);
+        return new ExtractedMethod(method, operator, containingNode);
     }
 
     private String mutateExpression(BinaryExpr expression) {

@@ -26,7 +26,7 @@ public class ProgramFeatures {
 		lengthOfPadding = Math.max(lengthOfPadding, 0);
 
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append(name).append(" ");
+		stringBuilder.append(name);
 		stringBuilder.append(originalOperator).append(" ");
 		stringBuilder.append(features.stream().map(ProgramRelation::toString).limit(m_CommandLineValues.MaxContexts).collect(Collectors.joining(" ")));
 

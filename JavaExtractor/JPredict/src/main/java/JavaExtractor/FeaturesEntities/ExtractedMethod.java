@@ -36,4 +36,9 @@ public class ExtractedMethod {
     public void setContainingNode(String containingNode) {
         this.containingNode = containingNode;
     }
+
+    @Override
+    public String toString() {
+        return containingNode + originalOperator + System.lineSeparator() + method.toString();
+    }
 }
