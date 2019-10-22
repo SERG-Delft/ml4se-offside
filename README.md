@@ -5,10 +5,11 @@ The aim of this project is to use [Code2Vec](www.code2vec.org) model and replace
 with a layer for bug detection. More specifically, we train the new model to detect 
 [off-by-one](https://en.wikipedia.org/wiki/Off-by-one_error) errors. 
 
-## Data collection: :floppy_disk:
-@TODO 
+## Data Collection: :floppy_disk:
+* Raw Java large dataset was used from [Code2Seq](https://github.com/tech-srl/code2seq#datasets)  
+* Preprocessed dataset available from [Our Google Drive](https://drive.google.com/open?id=1-Ko1ggxP7FIG_VAnDZvkU7iYRviWs25i)
 
-## Setting up env: :clipboard:
+## Setting Up the Environment: :clipboard:
 * Install [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/)
 * Create a new environment:  
 
@@ -20,13 +21,15 @@ with a layer for bug detection. More specifically, we train the new model to det
 
 `tensorflow-gpu==2.0.0-rc1` with `tensorflow==2.0.0-rc1`.
   
-## Extracting custom code2vec model from the original weights:
+## Extracting Custom Code2Vec Model From the Original Weights:
 * Download the [pre-trained model](`https://s3.amazonaws.com/code2vec/model/java14m_model_trainable.tar.gz`).
 * Make sure this is the trainable model. 
 * Unzip this folder in the `resources` folder in project root.
+* Download & unzip [custom_model.zip](https://drive.google.com/drive/folders/1HMOsX_Kkk3kYZETyHL5VxsubLfbT4RzH) to `resources/models`
 * Run `ExtractWeightRealCode2Vec.py`. This scripts extrat the weights from the original model 
 and transforms them into weights for a `Code2VecCustomModel`.
 * The custom model can now be used in the any tf graph. 
+* Run `main.py` to see an example
 
 
 ## Generating Test Data
