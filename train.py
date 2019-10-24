@@ -19,7 +19,7 @@ parser.add_argument(
     help="path to the val data set of format: <path>/<prefix>. It auto reads in all sub components at that path"
 )
 parser.add_argument(
-    "-b", "--batch_size", default="1024", help="path to the output folder"
+    "-b", "--batch_size", default="1024", help="batch size as int"
 )
 parser.add_argument(
     "-w", "--pre_trained_weights", default="resources/models/custom/model", help="path to the pre trained weights of the trained network"
