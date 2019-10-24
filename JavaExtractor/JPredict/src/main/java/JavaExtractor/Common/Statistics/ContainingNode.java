@@ -2,10 +2,7 @@ package JavaExtractor.Common.Statistics;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AssignExpr;
-import com.github.javaparser.ast.expr.ConditionalExpr;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
 
 public enum ContainingNode {
@@ -20,7 +17,13 @@ public enum ContainingNode {
     ASSERT(AssertStmt.class, "Assertion"),
     VARIABLEDECLARATOR(VariableDeclarator.class, "Boolean declaration"), //boolean isLeaving = position < EXIT_THRESHOLD;
     OBJECTCREATION(ObjectCreationExpr.class, "Object creation"), //operation = new RemoveFamily(r < 12);
-    EXPRESSION(ExpressionStmt.class, "Lambda expression"); //nodes.stream().filter( it -> it.getComments().size() > 0).count() >= 0;
+    EXPRESSION(ExpressionStmt.class, "Lambda expression"), //nodes.stream().filter( it -> it.getComments().size() > 0).count() >= 0;
+    FOREACH(ForeachStmt.class, "For Each statement"),
+    MEMBERVALUEPAIR(MemberValuePair.class, "Member Value Pair"),
+    SINGLEMEMBERANNOTATION(SingleMemberAnnotationExpr.class, "Single Member Annotation"),
+    SWITCHENTERY(SwitchEntryStmt.class, "Switch Entry Statement"),
+    ARRAYACCESS(ArrayAccessExpr.class, "Array Access Expression");
+
 
     private Class<? extends Node> nodeClass;
     private String name;
