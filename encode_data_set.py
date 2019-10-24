@@ -22,6 +22,7 @@ args = parser.parse_args()
 
 
 def main():
+    # Configuration setup
     config = Config(set_defaults=True)
     output_prefix = args.prefix
     dataset_path = args.dataset
