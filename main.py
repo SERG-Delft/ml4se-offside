@@ -11,7 +11,7 @@ from utils.Vocabularies import Code2VecVocabs
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "-w", "--weights", default="resources/models/pre_trained/model", help="path to the weights of the trained network"
+    "-w", "--weights", default="resources/models/custom3/model", help="path to the weights of the trained network"
 )
 parser.add_argument(
     "-i", "--input", default="Input.java", help="path to the input file"

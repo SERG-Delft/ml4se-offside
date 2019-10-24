@@ -19,7 +19,7 @@ parser.add_argument(
     help="path to the val data set of format: <path>/<prefix>. It auto reads in all sub components at that path"
 )
 parser.add_argument(
-    "-b", "--batch_size", default="data/", help="path to the output folder"
+    "-b", "--batch_size", default="1024", help="path to the output folder"
 )
 parser.add_argument(
     "-w", "--pre_trained_weights", default="resources/models/custom/model", help="path to the pre trained weights of the trained network"
@@ -38,7 +38,7 @@ args = parser.parse_args()
 
 def main() -> None:
     # config
-    batch_size = args.batch_size
+    batch_size = int(args.batch_size)
     output_path = args.output
     X_train, Y_train = load_data(args.trainset)
     X_val, Y_val = load_data(args.valset)
