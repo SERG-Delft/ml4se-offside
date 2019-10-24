@@ -14,7 +14,7 @@ parser.add_argument(
     "-w", "--weights", default="resources/models/pre_trained/model", help="path to the weights of the trained network"
 )
 parser.add_argument(
-    "-i", "--input", default="Input.java", help="path to the weights of the trained network"
+    "-i", "--input", default="Input.java", help="path to the input file"
 )
 args = parser.parse_args()
 
@@ -37,7 +37,6 @@ if __name__ == '__main__':
     predict_reader = PathContextReader(vocabs=vocabs,
                                        model_input_tensors_former=_TFEvaluateModelInputTensorsFormer(),
                                        config=config)
-
 
     def predict(line):
         # Extract numerical form suitable for model
