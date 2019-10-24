@@ -1,15 +1,21 @@
-from abc import ABC, abstractmethod
-from typing import List, Set, Dict, Tuple, Optional, Union, Any, cast
+from typing import List, Tuple
+
 import tensorflow as tf
+
 from Config import Config
-from models.Code2VecCustomModel import Code2VecCustomModel
 from utils.Types import GraphInput
-import numpy as np
+
 
 def _assert_shape(x: tf.Tensor, shape: List[int]) -> None:
     assert x.shape.as_list() == shape, f"Expected shape: {shape} but was: {x.shape.as_list()}"
 
+
 class Code2VecEmbedding(tf.keras.Model):
+    """
+    Emmbeding layer of code2vec only.
+    Extracted for transformer model.
+    """
+
     def __init__(
             self,
             config: Config,
@@ -46,5 +52,3 @@ class Code2VecEmbedding(tf.keras.Model):
         _assert_shape(context_embed, [batch_size, self.config.MAX_CONTEXTS, self.config.CODE_VECTOR_SIZE])
 
         return context_embed
-
-

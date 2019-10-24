@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
-from typing import List, Set, Dict, Tuple, Optional, Union, Any, cast
+from typing import List, Tuple
+
 import tensorflow as tf
 
 from Config import Config
@@ -11,6 +11,11 @@ def _assert_shape(x: tf.Tensor, shape: List[int]) -> None:
 
 
 class Code2VecAttention(tf.keras.Model):
+    """
+    Attention layer only of code2vec
+    Extracted for transformer model.
+    """
+
     def __init__(
             self,
             config: Config,
@@ -70,4 +75,3 @@ class Code2VecAttention(tf.keras.Model):
         _assert_shape(code_vectors, [batch_size, self.config.CODE_VECTOR_SIZE])
 
         return code_vectors, attention_weights
- 

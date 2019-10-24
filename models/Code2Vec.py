@@ -1,14 +1,17 @@
-from abc import ABC, abstractmethod
-from typing import List, Set, Dict, Tuple, Optional, Union, Any, cast
+from typing import Tuple
+
 import tensorflow as tf
 
-from Config import Config
 from models.Code2VecAttention import Code2VecAttention
 from models.Code2VecEmbedding import Code2VecEmbedding
 from utils.Types import GraphInput
 
 
 class Code2Vec(tf.keras.Model):
+    """
+    Code2vec model split up into 2 parts.
+    """
+
     def __init__(
             self,
             code2vec_embedding: Code2VecEmbedding,
@@ -18,7 +21,6 @@ class Code2Vec(tf.keras.Model):
         super(Code2Vec, self).__init__(**kwargs)
         self.code2vec_embedding = code2vec_embedding
         self.code2vec_attention = code2vec_attention
-
 
     def call(
             self,
@@ -30,5 +32,3 @@ class Code2Vec(tf.keras.Model):
         code_vectors, attention_weights = self.code2vec_attention([context_embed, context_valid_masks], **kwargs)
 
         return code_vectors, attention_weights
-
-
