@@ -1,17 +1,27 @@
-import numpy as np
+import argparse
+
 import tensorflow as tf
 
 from Config import Config
-from models.Code2VecCustomModel import Code2VecCustomModel, _TFEvaluateModelInputTensorsFormer
+from models.Code2VecCustomModel import _TFEvaluateModelInputTensorsFormer, Code2VecCustomModel
 from models.CustomModel import CustomModel
 from scripts.Extractor import Extractor
 from scripts.PathContextReader import PathContextReader
 from utils.Vocabularies import Code2VecVocabs
 
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-w", "--weights", default="resources/models/pre_trained/model", help="path to the weights of the trained network"
+)
+parser.add_argument(
+    "-i", "--input", default="Input.java", help="path to the weights of the trained network"
+)
+args = parser.parse_args()
 
 if __name__ == '__main__':
     config = Config(set_defaults=True)
 
+    # Create the extractor
     path_extractor = Extractor(config,
                                jar_path=config.EXTRACTOR_JAR_PATH,
                                max_path_length=config.MAX_PATH_LENGTH,
@@ -20,40 +30,30 @@ if __name__ == '__main__':
     # Create a model
     code2vec = Code2VecCustomModel(config)
     model = CustomModel(code2vec)
-    model.load_weights("resources/models/pre_trained/model")
+    model.load_weights(args.weights)
 
-
-    input_filename = 'Input.java'
-    config.get_logger().info('Starting interactive prediction...')
+    # Create the PathContextReader
     vocabs = Code2VecVocabs(config)
-
     predict_reader = PathContextReader(vocabs=vocabs,
                                        model_input_tensors_former=_TFEvaluateModelInputTensorsFormer(),
                                        config=config)
 
-    @tf.function # With this tf.functionn we stack the other tf.function such that they are combined into a single call graph on the gpu.
+
     def predict(line):
         # Extract numerical form suitable for model
-        print("line")
-        print(line)
         reader_output = predict_reader.process_input_row(line)
         inputs = [reader_output[1], reader_output[2], reader_output[3], tf.cast(reader_output[4], tf.float32)]
-
-
         return model(inputs)
 
 
-
     try:
-        predict_lines, hash_to_string_dict = path_extractor.extract_paths(input_filename)
-        print("hash_to_string_dict")
-        print(hash_to_string_dict)
-        print("predict_lines")
-        print(predict_lines)
+        predict_lines, hash_to_string_dict = path_extractor.extract_paths(args.input)
+        # Make a prediction for each function in the file
         for line in predict_lines:
-            prediction = predict(line)
+            prediction = predict(tf.convert_to_tensor(line))
+            print(f"Input function name: {line.split(maxsplit=1)[0]}")
+            print(f"raw input: {line}")
             # Probability of code containing a bug
-            print("Prediction: " + str(prediction.numpy()[0,0]))
+            print(f"Prediction: {prediction.numpy()[0, 0] * 100}%")
     except ValueError as e:
         print(e)
-
