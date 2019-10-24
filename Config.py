@@ -30,7 +30,8 @@ class Config:
         self.CUSTOM_MODEL_WEIGHT_DIR = os.path.join(self.ROOT, "resources", "models", "custom3", "model")
         self.MODEL_LOAD_PATH = os.path.join(self.ORIGINAL_MODEL_DIR, self.ORIGINAL_MODEL_NAME)
         self.VERBOSE_MODE: int = 1
-        self.TESTING_BUG_THRESHOLD: float = 0.7
+        self.TESTING_BUG_THRESHOLD: float = 0.5
+        self.N_PREDICTIONS = 1
 
     def __init__(self, set_defaults: bool = False):
 
@@ -58,6 +59,7 @@ class Config:
         self.VERBOSE_MODE: int = 0
         self.LOGS_PATH: Optional[str] = None
         self.TESTING_BUG_THRESHOLD: float = 0
+        self.N_PREDICTIONS: int = 0
 
         self.__logger: Optional[logging.Logger] = None
 

@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
-from typing import List, Set, Dict, Tuple, Optional, Union, Any, cast
+from typing import Tuple
+
 import tensorflow as tf
 
 from Config import Config
@@ -10,6 +10,11 @@ from utils.Types import GraphInput
 
 
 class Code2VecTransformerBased(tf.keras.Model):
+    """
+    The transformer model.
+    Based on original code2vec model but adds additional bert layer before final prediction.
+    """
+
     def __init__(
             self,
             config: Config,
@@ -20,10 +25,11 @@ class Code2VecTransformerBased(tf.keras.Model):
         self.config = config
         super(Code2VecTransformerBased, self).__init__(**kwargs)
         self.code2vec_embedding = code2vec_embedding
-        self.encoder1 = EncoderLayer(d_model=config.CODE_VECTOR_SIZE, dff=4 * config.CODE_VECTOR_SIZE, num_heads=8, rate=1 - self.config.DROPOUT_KEEP_RATE)
-        self.encoder2 = EncoderLayer(d_model=config.CODE_VECTOR_SIZE, dff=4 * config.CODE_VECTOR_SIZE, num_heads=8, rate=1 - self.config.DROPOUT_KEEP_RATE)
+        self.encoder1 = EncoderLayer(d_model=config.CODE_VECTOR_SIZE, dff=4 * config.CODE_VECTOR_SIZE, num_heads=8,
+                                     rate=1 - self.config.DROPOUT_KEEP_RATE)
+        self.encoder2 = EncoderLayer(d_model=config.CODE_VECTOR_SIZE, dff=4 * config.CODE_VECTOR_SIZE, num_heads=8,
+                                     rate=1 - self.config.DROPOUT_KEEP_RATE)
         self.code2vec_attention = code2vec_attention
-        #self.layernorm = tf.keras.layers.LayerNormalization(epsilon=1e-6)
         self.prediction_layer = tf.keras.layers.Dense(1, activation="sigmoid")
 
     def call(
@@ -38,8 +44,7 @@ class Code2VecTransformerBased(tf.keras.Model):
         context_embed = self.encoder2([context_embed, encoder_mask], **kwargs)
 
         code_vectors, attention_weights = self.code2vec_attention([context_embed, context_valid_masks], **kwargs)
-        #code_vectors = self.layernorm(code_vectors)
+        # code_vectors = self.layernorm(code_vectors)
         outputs = self.prediction_layer(code_vectors, **kwargs)
 
         return outputs
- 
