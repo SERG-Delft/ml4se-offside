@@ -1,13 +1,15 @@
+import argparse
+import csv
 from collections import defaultdict
+
+import tensorflow as tf
 
 from Config import Config
 from models.Code2VecCustomModel import _TFEvaluateModelInputTensorsFormer, Code2VecCustomModel
 from models.CustomModel import CustomModel
 from scripts.PathContextReader import PathContextReader
 from utils.Vocabularies import Code2VecVocabs
-import tensorflow as tf
-import csv
-import re
+
 
 class ConfustionMatrix(object):
     def __init__(self):
@@ -28,93 +30,101 @@ class ConfustionMatrix(object):
         else:
             raise Exception(f"Unknown values y_predict={y_predict} y_real={y_real}")
 
-    @property
-    def accuracy(self):
-        if self.tp + self.tn + self.fp + self.fn == 0:
-            return 0
-        return (self.tp + self.tn) / (self.tp + self.tn + self.fp + self.fn)
 
-    @property
-    def recall(self):
-        if self.tp + self.fn == 0:
-            return 0
-        return self.tp / (self.tp + self.fn)
-
-    @property
-    def precision(self):
-        if self.tp + self.fp == 0:
-            return 0
-        return self.tp / (self.tp + self.fp)
-
-    @property
-    def f1(self):
-        if self.tp + self.fp + self.fn == 0:
-            return 0
-        return 2 * self.tp / (2 * self.tp + self.fp + self.fn)
-
-    def __repr__(self) -> str:
-        return f"ConfustionMatrix(tp={self.tp}, tn={self.tn}, fp={self.fp}, fn={self.fn}, accuracy={self.accuracy}, recall={self.recall}, precision={self.precision}, f1={self.f1})"
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-d", "--dataset", default="data/java-large-test.txt", help="path to the data set."
+)
+parser.add_argument(
+    "-w", "--weigths", default="resources/models/custom3/model", help="path to model weights"
+)
+parser.add_argument(
+    "-t", "--threshold", default="0.5", help="the bug classification threshold"
+)
+parser.add_argument(
+    "-o", "--output", default="data/stats.csv", help="the path to the output csv file."
+)
+args = parser.parse_args()
 
 
 def main():
-    dataset_path = "data/java-large-test-IFonly.txt"
-    threshold = 0.5
+    # Configuration setup
+    dataset_path = args.dataset
+    threshold = float(0.5)
     combine_sub_cats = False
-
     config = Config(set_defaults=True)
+
+    # Create the path context reader.
     vocabs = Code2VecVocabs(config)
     predict_reader = PathContextReader(vocabs=vocabs,
                                        model_input_tensors_former=_TFEvaluateModelInputTensorsFormer(),
                                        config=config)
 
+    # Load the model
     code2vec = Code2VecCustomModel(config)
     model = CustomModel(code2vec)
-    model.load_weights("resources/models/pre_trained/model")
-    # model.load_weights("resources/models/pre_trained_if0/model")
-    #model.load_weights("resources/models/frozen/model")
-    #model.load_weights("resources/models/random_init/model")
+    model.load_weights(args.weigths)
+
     model.compile(loss='binary_crossentropy', optimizer='adam')
 
     results = defaultdict(ConfustionMatrix)
 
     @tf.function
     def validate_line(line):
+        """
+        
+        :param line: A row from the dataset in a tensor string.
+        :return: The prediction and the real value.
+        """
         reader_output = predict_reader.process_input_row(line)
-
-
         inputs = [reader_output[1], reader_output[2], reader_output[3], tf.cast(reader_output[4], tf.float32)]
 
+        # Transform results into a scaler
         Y_predict = tf.squeeze(model(inputs))
         Y = tf.squeeze(tf.strings.to_number(reader_output[0]))
 
         return Y_predict, Y
 
-
     for i, data in enumerate(read_dateset(dataset_path, combine_sub_cats=combine_sub_cats)):
         types, line = data
 
+        # Transform dataset line into prediction, real value pair.
         Y_predict, Y = validate_line(tf.convert_to_tensor(line))
         Y = Y.numpy()
         Y_predict = Y_predict.numpy()
         Y_predict = 1.0 if Y_predict >= threshold else 0.0
+
+        # Add prediction to the correct bug type class.
         for type in types:
             results[type].add(Y_predict, Y)
 
         if i % 1000 == 0:
             print(f"Step[{i}]")
 
-    with open('data/stats.csv', 'w', newline='') as result_file:
+    # write the resulting prediction scores to disk
+    with open(args.output, 'w', newline='') as result_file:
         wr = csv.writer(result_file)
         for type, matrix in results.items():
             data = [type, str(matrix.tp), str(matrix.tn), str(matrix.fp), str(matrix.fn)]
             wr.writerow(data)
 
+
 def read_dateset(path: str, combine_sub_cats: bool = False):
+    """
+    A lazy reader.
+    :param path: Path to the dataset.
+    :param combine_sub_cats: If true ignore comparator type.
+    :return: A generator that returns each line.
+    """
     with open(path) as f:
         for line in f:
+            # removes training \n because code2vec encoder doesn't work trailing \n's
             line = line.rstrip("\n")
+            # Extract the types created by the mutator.
             types, data = line.split(maxsplit=1)
-            types = list(filter(lambda x : len(x) > 0, types.split("#")))
+            # Unflattens the nobug types.
+            types = list(filter(lambda x: len(x) > 0, types.split("#")))
+            # marks the row with bug/nobug target value.
             if "NoBug" in types:
                 types = types[1:]
                 data = "0 " + data
@@ -123,10 +133,16 @@ def read_dateset(path: str, combine_sub_cats: bool = False):
                 types = list(map(map_to_oposite_sign, types))
 
             if combine_sub_cats:
+                # removes compartor information.
                 types = list(map(map_sub_catagory, types))
             yield types, data
 
+
 def map_to_oposite_sign(cat: str) -> str:
+    """
+    :param cat: The catagory line.
+    :return: The oposite comparator operator.
+    """
     if cat.endswith("greaterEquals"):
         return cat.replace("greaterEquals", "greater")
     if cat.endswith("greater"):
@@ -139,6 +155,11 @@ def map_to_oposite_sign(cat: str) -> str:
 
 
 def map_sub_catagory(cat: str) -> str:
+    """
+    
+    :param cat: The catagory string.
+    :return: The sub catagory name.
+    """
     if cat.startswith("NoBug"):
         return "NoBug"
     if cat.startswith("FOR"):
