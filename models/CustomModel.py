@@ -2,6 +2,7 @@ from typing import Tuple
 
 import tensorflow as tf
 
+from models.Code2Vec import Code2Vec
 from models.Code2VecCustomModel import Code2VecCustomModel
 from utils.Types import GraphInput
 
@@ -13,7 +14,7 @@ class CustomModel(tf.keras.Model):
 
     def __init__(
             self,
-            code2vec: Code2VecCustomModel,
+            code2vec: Code2Vec,
             **kwargs
     ) -> None:
         super(CustomModel, self).__init__(**kwargs)

@@ -6,7 +6,10 @@ import numpy as np
 import tensorflow as tf
 
 from Config import Config
+from models.Code2Vec import Code2Vec
+from models.Code2VecAttention import Code2VecAttention
 from models.Code2VecCustomModel import Code2VecCustomModel
+from models.Code2VecEmbedding import Code2VecEmbedding
 from models.CustomModel import CustomModel
 
 parser = argparse.ArgumentParser()
@@ -22,7 +25,10 @@ parser.add_argument(
     "-b", "--batch_size", default="1024", help="batch size as int"
 )
 parser.add_argument(
-    "-w", "--pre_trained_weights", default="resources/models/custom/model", help="path to the pre trained weights of the trained network"
+    "-w1", "--pre_trained_embedding", default="", help="path to the pre trained code2vec embedding weights e.g.: 'resources/models/code2vec/embedding/model'"
+)
+parser.add_argument(
+    "-w2", "--pre_trained_attention", default="", help="path to the pre trained code2vec attention weights e.g.: 'resources/models/code2vec/attention/model'"
 )
 parser.add_argument(
     "-f", "--freeze", default="False", choices=["False", "True"], help="path to the pre trained weights of the trained network"
@@ -31,7 +37,7 @@ parser.add_argument(
     "-o", "--output", default="", help="output path for the weights"
 )
 parser.add_argument(
-    "-s", "--shutdown", default="True", choices=["False", "True"], help="output path for the weights"
+    "-s", "--shutdown", default="False", choices=["False", "True"], help="Automatic shut down after training"
 )
 args = parser.parse_args()
 
@@ -46,11 +52,15 @@ def main() -> None:
     shutdown = args.shutdown == "True"
 
     config = Config(set_defaults=True)
-    code2Vec = Code2VecCustomModel(config)
+    code2vec_embedding = Code2VecEmbedding(config)
+    code2vec_attention = Code2VecAttention(config)
+    code2Vec = Code2Vec(code2vec_embedding, code2vec_attention)
 
     # Setup transfer learning if enabled.
-    if args.pre_trained_weights != "":
-        code2Vec.load_weights(args.pre_trained_weights)
+    if args.pre_trained_embedding != "":
+        code2vec_embedding.load_weights(args.pre_trained_embedding)
+    if args.pre_trained_attention != "":
+        code2vec_attention.load_weights(args.pre_trained_attention)
     if freeze:
         code2Vec.token_embedding_layer.trainable = freeze
         code2Vec.path_embedding_layer.trainable = freeze
