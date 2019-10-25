@@ -7,7 +7,7 @@ with a layer for bug detection. More specifically, we train the new model to det
 [off-by-one](https://en.wikipedia.org/wiki/Off-by-one_error) errors.   
 * Report:  
 * Poster:  https://pubsecure.lucidpress.com/cd8dd2b3-6e3b-4606-b1fe-6fd172dc9238/#EyrcOno3xlfW
-* Slides:  
+* Slides:  https://docs.google.com/presentation/d/1_uJpnyXuuapQrl4I2mJ6oLryUvFtDyOYmDBDlhd7aJo/edit?usp=sharing
   
 ## Data Collection: :floppy_disk:  
 * Raw Java large dataset was used from [Code2Seq](https://github.com/tech-srl/code2seq#datasets)    
@@ -55,6 +55,3 @@ The model can be tested in 2 ways.
 
  1. Using the command: `validation_on_testset.py --weights <path_to_model_weights_folder> --dataset <path_to_data_folder>/<test_prefix> --threshold 0.5 --batch_size 1024`. This can be used to test the model against a unseen test set. This script will output the confusion matrix, test_loss, accuracy, f1_score, precision_score and recall_score.
  2.  Using the command: `calc_prediction_stats.py --weights <path_to_model_weights_folder> --dataset <path_to_data_folder>/<test_prefix> --threshold 0.5 --batch_size 1024 --output <path>/stats.csv`. This can be used to calculate the TP, TN, FP and FN per off-by-one type. The result will be stored in the `stats.csv` file.
- 
- ## Presentation
- Link to our presentation can be found [here](https://docs.google.com/presentation/d/1_uJpnyXuuapQrl4I2mJ6oLryUvFtDyOYmDBDlhd7aJo/edit?usp=sharing)
