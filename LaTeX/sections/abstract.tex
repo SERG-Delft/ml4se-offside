@@ -1,7 +1,7 @@
 \begin{abstract}
     Recent advances in neural modeling for bug detection have been very promising. More specifically, using snippets of code to create continuous vectors or \textit{embeddings} has been shown to be very good at method name prediction and claimed to be efficient at other tasks, such as bug detection. However, to this end, the method has not been empirically tested for the latter.
 
-    In this work, we use the Code2Vec model of Alon et al. to evaluate it for detecting off-by-one errors in Java source code. We define bug detection as a binary classification problem and train our model on a large Java file corpus containing likely correct code. In order to properly classify incorrect code, the model needs to be trained on false examples as well. To achieve this, we create likely incorrect code by making simple mutations to the original corpus.
+    In this work, we use the Code2Vec model of Alon et al. \cite{alon2019code2vec} to evaluate it for detecting off-by-one errors in Java source code. We define bug detection as a binary classification problem and train our model on a large Java file corpus containing likely correct code. In order to properly classify incorrect code, the model needs to be trained on false examples as well. To achieve this, we create likely incorrect code by making simple mutations to the original corpus.
     
     Our quantitative and qualitative evaluations show that an attention-based model that uses a structural representation of code can be indeed successfully used for other tasks than method naming. 
 \end{abstract}

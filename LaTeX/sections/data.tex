@@ -2,7 +2,7 @@
 In this section, we describe the data used to train our model. In Section \ref{sec:obo_errors} we first describe the type of bug we aim to detect, in Section \ref{sec:datasets} we describe the data we used. In Section \ref{sec:mutations} we describe how we mutated the data to generate positive code (containing bugs) and finally we describe how we represent source code as a vector using the approach defined by Alon et al. \cite{alon2019code2vec} in Section \ref{sec:SourceCodeRepresentation}.
 
 \subsection{Off-by-one errors}\label{sec:obo_errors}
-Off-by-one errors (in Java terms '<' vs '<=' and '>' vs '>=') are generally considered to be among the most common bugs in software\cite{dowd2006art}. They are particularly difficult to find in source code because there exist no tools which can accurately locate them and the result is not always obviously wrong, it is merely off-by-one. In most cases, it will lead to an "Out of bounds" situation which will result in an application crash. However, it might not crash an application and might lead to arbitrary code execution or memory corruptions, potentially exploitable by adversaries \cite{dowd2006softsec}. 
+Off-by-one errors (in Java terms '<' vs '<=' and '>' vs '>=') are generally considered to be among the most common bugs in software. They are particularly difficult to find in source code because there exist no tools which can accurately locate them and the result is not always obviously wrong, it is merely off-by-one. In most cases, it will lead to an "Out of bounds" situation which will result in an application crash. However, it might not crash an application and might lead to arbitrary code execution or memory corruptions, potentially exploitable by adversaries \cite{dowd2006art}. 
 
 Manually inspecting code for off-by-one errors is very time-consuming since determining which binary operator is actually the correct one is usually heavily context-dependent. This is also why we chose to base our approach on the work done by Code2Vec \cite{alon2019code2vec}, this allows the model to discover code context heuristics which static code analyzers are not able to capture. 
 
@@ -52,7 +52,7 @@ For our training data we need both positive (containing bugs) code and negative 
 
 \subsection{Mutations}\label{sec:mutations}
 
-To generate our mutations we consider each method and search for any occurrences of comparators. If the method contains a comparator it is extracted from the code for further manipulation, any methods not containing a comparator are ignored. Once we have extracted all methods of interest from the code, the method is parsed for different \textit{context types} that comparators occur in. This is done so that we can account for different sub-types of off-by-one errors and also evaluate if our model is better at detecting bugs in some contexts than others. We define a context type as the combination of the operator (less, lessEquals, greater or greaterEquals) and the type of statement it occurs in (For loop, If statement, While loop, etc), more specifically this is the class of the operator's parent node in the AST. For a full list of all context types refer to Appendix \ref{appendix:quantitative_evaluation}. For every method, a random comparator is selected, mutated and turned into its respective off-by-one comparator (for example, '<' will be mutated into '<='). Finally both the original and the mutated methods are added to the dataset.
+To generate our mutations we consider each method and search for any occurrences of comparators. If the method contains a comparator it is extracted from the code for further manipulation, any methods not containing a comparator are ignored. Once we have extracted all methods of interest from the code, the method is parsed for different \textit{context types} that comparators occur in. This is done so that we can account for different sub-types of off-by-one errors and also evaluate if our model is better at detecting bugs in some contexts than others. 
 
 \begin{lstlisting}[caption={An example of a method before mutation. The context type of this comparator is FORless},captionpos=b]
 public void setContents(List<Content> contentsBefore, List<Content> contentsAfter) {
@@ -64,6 +64,8 @@ public void setContents(List<Content> contentsBefore, List<Content> contentsAfte
     }
 }
 \end{lstlisting}
+
+We define a context type as the combination of the operator (less, lessEquals, greater or greaterEquals) and the type of statement it occurs in (For loop, If statement, While loop, etc), more specifically this is the class of the operator's parent node in the AST. For a full list of all context types refer to Appendix \ref{appendix:quantitative_evaluation}. For every method, a random comparator is selected, mutated and turned into its respective off-by-one comparator (for example, '<' will be mutated into '<='). Finally both the original and the mutated methods are added to the dataset.
 
 \begin{lstlisting}[caption={An example of a method after mutation. The context type of this comparator is FORlessEqueals},captionpos=b]
 public void setContents(List<Content> contentsBefore, List<Content> contentsAfter) {
