@@ -31,7 +31,7 @@ parser.add_argument(
     "-o", "--output", default="", help="output path for the weights"
 )
 parser.add_argument(
-    "-s", "--shutdown", default="True", choices=["False", "True"], help="output path for the weights"
+    "-s", "--shutdown", default="False", choices=["False", "True"], help="Automatic shut down after training"
 )
 args = parser.parse_args()
 

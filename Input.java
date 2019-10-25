@@ -1,7 +1,15 @@
-int helloWorld(int n) {
-    int sum = 0;
-    for (int i = 1; i < n; i++) {
-        sum += i;
+int helloWorldBug(int n) {
+    int[] array = new int[n];
+    for (int i = 0; i <= n; i++) {
+        array[i] = i;
     }
-    return sum;
+    return array;
+}
+
+int helloWorldNoBug(int n) {
+    int[] array = new int[n];
+    for (int i = 0; i < n; i++) {
+        array[i] = i;
+    }
+    return array;
 }

@@ -10,10 +10,10 @@ from utils.Vocabularies import Code2VecVocabs
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "-i", "--dataset", default="data/java-large-test-IFonly.txt", help="path to the data set."
+    "-i", "--dataset", default="data/java-large-test.txt", help="path to the data set."
 )
 parser.add_argument(
-    "-o", "--output", default="data/", help="path to the output folder"
+    "-o", "--output", default="data\\", help="path to the output folder"
 )
 parser.add_argument(
     "-x", "--prefix", default="", help="prefix for the output files"
@@ -26,8 +26,10 @@ def main():
     config = Config(set_defaults=True)
     output_prefix = args.prefix
     dataset_path = args.dataset
-    if dataset_path[-1] != "/":
-        dataset_path += "/"
+    output_path = args.output
+    if output_path[-1] != "/" and output_path[-1] != "\\":
+        output_path += "/"
+
 
     n_paths = config.MAX_CONTEXTS
     n_predictions = config.N_PREDICTIONS
@@ -62,11 +64,11 @@ def main():
             print(f"Completed {i + 1} of the {n_entries} entries")
 
     # Store resulting numpy data structures on disc.
-    np.save(f"{dataset_path}{output_prefix}path_source_token_idxs.npy", path_source_token_idxs)
-    np.save(f"{dataset_path}{output_prefix}path_idxs.npy", path_idxs)
-    np.save(f"{dataset_path}{output_prefix}path_target_token_idxs.npy", path_target_token_idxs)
-    np.save(f"{dataset_path}{output_prefix}context_valid_masks.npy", context_valid_masks)
-    np.save(f"{dataset_path}{output_prefix}Y.npy", Y)
+    np.save(f"{output_path}{output_prefix}path_source_token_idxs.npy", path_source_token_idxs)
+    np.save(f"{output_path}{output_prefix}path_idxs.npy", path_idxs)
+    np.save(f"{output_path}{output_prefix}path_target_token_idxs.npy", path_target_token_idxs)
+    np.save(f"{output_path}{output_prefix}context_valid_masks.npy", context_valid_masks)
+    np.save(f"{output_path}{output_prefix}Y.npy", Y)
 
 
 def read_n_entries(path: str) -> int:

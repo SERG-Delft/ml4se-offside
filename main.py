@@ -50,9 +50,8 @@ if __name__ == '__main__':
         # Make a prediction for each function in the file
         for line in predict_lines:
             prediction = predict(tf.convert_to_tensor(line))
-            print(f"Input function name: {line.split(maxsplit=1)[0]}")
-            print(f"raw input: {line}")
+            print("raw input: " + line)
             # Probability of code containing a bug
-            print(f"Prediction: {prediction.numpy()[0, 0] * 100}%")
+            print("Has a bug prediction: " + str(prediction.numpy()[0, 0] * 100) + "%")
     except ValueError as e:
         print(e)
