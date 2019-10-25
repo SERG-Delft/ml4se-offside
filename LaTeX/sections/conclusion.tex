@@ -1,0 +1,8 @@
+\section{Conclusion} \label{sec:conclusion}
+We used encouraging results of Code2Vec model to test it on detecting off-by-one errors in arbitrary sized Java methods. The core idea of using a soft-attention mechanism to gain vector representations from AST paths remained the same. However, we modified the final layer to repurpose the model for detecting bugs instead of naming a method.
+
+We tested different architectures of the model and tried to apply transfer learning. However, transfer learning proved only to be slightly better than a randomly initialized model and did not speed up the training process significantly. We trained the model on a large Java corpus of likely correct code to which we introduced simple mutations to get faulty samples.
+
+The results of the quantitative and qualitative analyses show that the model has promising results and can generalize off-by-one errors in different contexts. However, the model suffers from the bias of the dataset and generates false positives for exotic code that deviates from standard style. In addition, the current model only analyses the AST of a single method, hence context is possibly lost which would allow detecting a bug.
+
+We believe that this method could be tested with other bugs, hence all of our code and links to our training data are available at \url{https://github.com/serg-ml4se-2019/group5-deep-bugs}.

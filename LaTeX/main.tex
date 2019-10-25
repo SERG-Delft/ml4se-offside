@@ -1,0 +1,125 @@
+\documentclass[sigconf]{acmart}
+\settopmatter{authorsperrow=4}
+%% REMOVE CITATION INFORMATION %%
+\settopmatter{printacmref=false} % Removes citation information below abstract
+\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
+\pagestyle{plain} % removes running headers
+
+%% Packages
+\usepackage{subfig}
+\usepackage{float}
+\usepackage{stfloats}
+\usepackage{url}
+\usepackage{multirow}
+\usepackage{tablefootnote}
+\usepackage{multicol}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\renewcommand{\aboverulesep}{0pt}
+\renewcommand{\belowrulesep}{0pt}
+\renewcommand{\arraystretch}{1.1}
+
+% Package to make bold table line
+\usepackage{boldline}
+\usepackage[toc]{appendix}
+\usepackage{geometry}
+
+\newenvironment{absolutelynopagebreak}
+  {\par\nobreak\vfil\penalty0\vfilneg
+   \vtop\bgroup}
+  {\par\xdef\tpd{\the\prevdepth}\egroup
+   \prevdepth=\tpd}
+
+
+% Packages for Java code listings START
+\usepackage[T1]{fontenc}
+\usepackage{inconsolata}
+
+\usepackage{color}
+
+\definecolor{pblue}{rgb}{0.13,0.13,1}
+\definecolor{pgreen}{rgb}{0,0.5,0}
+\definecolor{pred}{rgb}{0.9,0,0}
+\definecolor{pgrey}{rgb}{0.46,0.45,0.48}
+
+\usepackage{listings}
+\lstset{language=Java,
+  basicstyle=\small,
+  showspaces=false,
+  showtabs=false,
+  breaklines=true,
+  showstringspaces=false,
+  breakatwhitespace=true,
+  commentstyle=\color{pgreen},
+  keywordstyle=\color{pblue},
+  stringstyle=\color{pred},
+  moredelim=[il][\textcolor{pgrey}]{$$},
+  moredelim=[is][\textcolor{pgrey}]{\%\%}{\%\%}
+}
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    \normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}
+
+\acmConference[Seminar: Analytics and Machine Learning for Software Engineering]{}{2019}{TU Delft}
+\acmBooktitle{Final Paper}
+\acmPrice{0}
+\acmISBN{ }
+
+\begin{document}
+
+\title[]{Using Distributed Representation of Code for Bug Detection \\ \small Analytics and Machine Learning for Software Engineering \\ IN4334 - Group 5 \\}
+
+\author{Jón Arnar Briem}
+\affiliation{
+  \studentcode{4937864 \\}
+  \institution{TU Delft}
+}
+\email{j.a.briem@student.tudeft.nl}
+
+
+\author{Jordi Smit}
+\affiliation{
+  \studentcode{4457714 \\}
+  \institution{TU Delft}
+}
+\email{j.smit-6@student.tudeft.nl}
+
+\author{Hendrig Sellik}
+\affiliation{
+  \studentcode{4894502 \\}
+  \institution{TU Delft}
+}
+\email{h.sellik@student.tudeft.nl}
+
+\author{Pavel Rapoport}
+\affiliation{
+  \studentcode{4729889 \\}
+  \institution{TU Delft}
+}
+\email{p.rapoport@student.tudeft.nl}
+
+
+\input{sections/abstract.tex}
+
+\keywords{}
+
+\maketitle
+
+
+
+\input{sections/introduction.tex}
+\input{sections/relevant_literature.tex}
+\input{sections/data.tex}
+\input{sections/model.tex}
+\input{sections/evaluation.tex}
+\input{sections/discussion.tex}
+\input{sections/conclusion.tex}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\input{sections/appendix.tex}
+
+\end{document}
+\endinput
