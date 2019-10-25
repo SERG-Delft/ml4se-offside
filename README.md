@@ -2,9 +2,12 @@
 # Using Distributed Representation of Code for Bug Detection :blue_book:  
   
 ## Description: :newspaper:  
-The aim of this project is to use [Code2Vec](www.code2vec.org) model and replace the final layer used for method naming   
-with a layer for bug detection. More specifically, we train the new model to detect   
+The aim of this project is to use [Code2Vec](www.code2vec.org) model and replace the final layer used for method naming 
+with a layer for bug detection. More specifically, we train the new model to detect 
 [off-by-one](https://en.wikipedia.org/wiki/Off-by-one_error) errors.   
+* Report:  [PDF](LaTeX/report_briem_smit_sellik_rapoport.pdf) / [LaTeX](LaTeX)
+* Poster:  https://pubsecure.lucidpress.com/cd8dd2b3-6e3b-4606-b1fe-6fd172dc9238/#EyrcOno3xlfW
+* Slides:  https://docs.google.com/presentation/d/1_uJpnyXuuapQrl4I2mJ6oLryUvFtDyOYmDBDlhd7aJo/edit?usp=sharing
   
 ## Data Collection: :floppy_disk:  
 * Raw Java large dataset was used from [Code2Seq](https://github.com/tech-srl/code2seq#datasets)    
