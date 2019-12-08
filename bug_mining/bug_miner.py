@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 
 from pydriller import RepositoryMining, GitRepository
+#import sys
+#sys.stdout = open('repo_miner_logs', 'w')
 
 """
 This script mines off-by-one errors from a specified 
@@ -47,22 +49,22 @@ for project_name in project_names:
                         line_nr = addition[0]
                         content = addition[1]
                         # <= to <
-                        if line_nr in lines_containing_less_or_equal and " < " in content:
+                        if line_nr in lines_containing_less_or_equal and " < " in content and " <= " not in content:
                             print(modified_file.filename + ":" + str(addition[0]))
                             print("<= to <")
                             print(gr.repo.remotes.origin.url[:-4] + "/commit/" + commit.hash)
                         # < to <=
-                        if line_nr in lines_containing_less and " <= " in content:
+                        if line_nr in lines_containing_less and " <= " in content and " < " not in content:
                             print(modified_file.filename + ":" + str(addition[0]))
                             print("< to <=")
                             print(gr.repo.remotes.origin.url[:-4] + "/commit/" + commit.hash)
                         # >= to >
-                        if line_nr in lines_containing_greater_or_equal and " > " in content:
+                        if line_nr in lines_containing_greater_or_equal and " > " in content and " >= " not in content:
                             print(modified_file.filename + ":" + str(addition[0]))
                             print(">= to >")
                             print(gr.repo.remotes.origin.url[:-4] + "/commit/" + commit.hash)
                         # > to >=
-                        if line_nr in lines_containing_greater and " >= " in content:
+                        if line_nr in lines_containing_greater and " >= " in content and " > " not in content:
                             print(modified_file.filename + ":" + str(addition[0]))
                             print("> to >=")
                             print(gr.repo.remotes.origin.url[:-4] + "/commit/" + commit.hash)
