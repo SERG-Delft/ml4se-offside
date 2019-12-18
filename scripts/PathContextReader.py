@@ -114,6 +114,19 @@ class PathContextReader:
         context_valid_mask = tf.cast(reduce(tf.logical_or, valid_word_mask_per_context_part),
                                      dtype=tf.float32)  # (max_contexts, )
 
+        source_unknown_tokens = tf.reduce_sum(tf.cast(path_source_token_indices == self.vocabs.token_vocab.get_unknown_token(),  tf.float32) * context_valid_mask) / tf.reduce_sum(context_valid_mask)
+        tf.print("source: ", source_unknown_tokens)
+
+        path_unknown_tokens = tf.reduce_sum(
+            tf.cast(path_indices == self.vocabs.path_vocab.get_unknown_token(), tf.float32) * context_valid_mask) / tf.reduce_sum(
+            context_valid_mask)
+        tf.print("path: ", path_unknown_tokens)
+
+        target_unknown_tokens = tf.reduce_sum(
+            tf.cast(path_target_token_indices == self.vocabs.token_vocab.get_unknown_token(), tf.float32) * context_valid_mask) / tf.reduce_sum(
+            context_valid_mask)
+        tf.print("target: ", target_unknown_tokens)
+
         # Will cause error when tensorflow-2.0.0-beta1 -> tensorflow-2.0.0-rc1
         # assert all(tensor.shape == (self.config.MAX_CONTEXTS,) for tensor in
         #           {path_source_token_indices, path_indices, path_target_token_indices, context_valid_mask})
@@ -129,3 +142,4 @@ class PathContextReader:
             path_strings=path_strings,
             path_target_token_strings=path_target_token_strings
         )
+

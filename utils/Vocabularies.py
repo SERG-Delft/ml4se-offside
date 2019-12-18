@@ -108,10 +108,14 @@ class Vocab:
         if self._word_to_index_lookup_table is None:
             self._word_to_index_lookup_table = self._create_word_to_index_lookup_table(
                 self.word_to_index, default_value=self.word_to_index[self.special_words.OOV])
+
         return self._word_to_index_lookup_table
 
     def lookup_index(self, word: tf.Tensor) -> tf.Tensor:
         return self.get_word_to_index_lookup_table().lookup(word)
+
+    def get_unknown_token(self):
+        return self.word_to_index[self.special_words.OOV]
 
 
 class Code2VecVocabs:
