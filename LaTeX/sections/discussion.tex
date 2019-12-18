@@ -1,0 +1,35 @@
+\section{Reflections}\label{sec:discussion}
+
+From the work conducted, several points can be singled out as discussing topics.
+
+\subsection{Advantages}
+\begin{itemize}
+    \item {\textbf{Better performance in non-trivial cases}: static analyzers that we used for evaluation can detect only very specific cases of off-by-one error. Our model allows to predict a much greater variety of off-by-one error cases.}
+    
+    \item {\textbf{Versatility}: The presented model can be trained to detect not only off-by-one errors but many other kinds of bugs with relatively small changes during the preprocessing stage. Only the algorithm used to create mutations should be changed in order to train our model to detect a different bug as long as a suitable training dataset exists.}
+\end{itemize}
+
+\subsection{Issues and potential improvements}
+\begin{itemize}
+    \item {\textbf{Using untraditional coding style leads to false positives}: using a for-loop of type \textit{for (i = start; i < end; ++i)} is very popular and a commonly used style. As a result, our model has 'learned' that any case of a for loop using <= is most likely a bug which in reality has a high chance of being a false positive. }
+    
+    \item{\textbf{Unbalanced dataset}
+    As stated in Section \ref{sec:datasets} our initial dataset contains 4 times fewer usages of >= or <= compared to usages of > or <. This difference can lead to biased training and as a result, our model is more tending to give false-positive results in case of >=/<= usage. One of the ways to reduce this influence is the creation of balanced dataset with more equal distribution of binary operators as well as the distribution of the places of their occurrence (if-conditions, for- and while-loops, ternary expressions, etc.)}
+    
+    \item {\textbf{Unknown behavior on long methods}: we currently consider at most 200 context paths. This is acceptable for our dataset where most of the methods are not very long. However, if input methods will be longer this might not be enough to provide decent predictions. The severity of this issue should be checked via further experiments on an appropriate dataset. However, it should be noted that increasing the size of context paths will also increase the computing time.}
+    
+    \item {\textbf{Current method constraints}: The AST paths extracted are constrained to the current method only. This issue is an artifact of the Code2Vec data extraction method. This approach is valid for their purpose since they do not need to know what is happening inside of the child methods which are called from the parent method to predict the name of the latter. However, for bug detection this knowledge is crucial and omitting contents of called methods might lead to unpredictable results. This could be solved by expanding the AST with the content of some of the inner method calls. However, as with the previous case, the maximum number of AST paths should be kept in mind.}
+    
+    \item {\textbf{Bug Creation}: Our dataset was created by inserting bugs into code using mutations similar to the approach used by \cite{pradel2018deepbugs}. This approach allows us to have plenty of data for training but depends on the quality of the original dataset. If that dataset contains many off-by-one errors, the model will interpret those errors as correct code resulting in lower accuracy. It is also possible that off-by-one errors that happen 'naturally' when developers write code are in some way different from the errors we created with mutations. If so, our model may not be able to correctly detect those 'natural' off-by-one bugs.}
+    
+\end{itemize}{}
+
+\subsection{Future work} \label{sec:future_work}
+As future research, the same method could be applied to other languages. The model should benefit more with languages with dynamic typing, such as Javascript or Python. For the latter, a context path extractor\footnote{\url{https://github.com/vovak/astminer/tree/master/astminer-cli}} was recently created by Kovalenko et al. \cite{kovalenko2019pathminer}.
+
+It might also be interesting to see if it is possible to achieve a
+higher overall score by not limiting the AST paths to the method scope. This should be possible since the model with
+the randomly initialized weights achieved similar overall scores to
+the model with fine-tuned weights. Hence, one is free to use altered encodings that span more than one method.
+
+In addition, the method could be evaluated on different kinds of bugs. There is also some room for improvement by balancing the training set with regards to the comparators in specific parts of code, like \textit{for loops}.

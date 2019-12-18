@@ -1,0 +1,85 @@
+\section{Data} \label{sec:data}
+In this section, we describe the data used to train our model. In Section \ref{sec:obo_errors} we first describe the type of bug we aim to detect, in Section \ref{sec:datasets} we describe the data we used. In Section \ref{sec:mutations} we describe how we mutated the data to generate positive code (containing bugs) and finally we describe how we represent source code as a vector using the approach defined by Alon et al. \cite{alon2019code2vec} in Section \ref{sec:SourceCodeRepresentation}.
+
+\subsection{Off-by-one errors}\label{sec:obo_errors}
+Off-by-one errors (in Java terms '<' vs '<=' and '>' vs '>=') are generally considered to be among the most common bugs in software. They are particularly difficult to find in source code because there exist no tools which can accurately locate them and the result is not always obviously wrong, it is merely off-by-one. In most cases, it will lead to an "Out of bounds" situation which will result in an application crash. However, it might not crash an application and might lead to arbitrary code execution or memory corruptions, potentially exploitable by adversaries \cite{dowd2006art}. 
+
+Manually inspecting code for off-by-one errors is very time-consuming since determining which binary operator is actually the correct one is usually heavily context-dependent. This is also why we chose to base our approach on the work done by Code2Vec \cite{alon2019code2vec}, this allows the model to discover code context heuristics which static code analyzers are not able to capture. 
+
+\subsection{Datasets}\label{sec:datasets}
+
+To train and validate our project we use the java-large dataset collected by Alon et al. \cite{code2seq}. It consists of 1000 top-starred projects from GitHub and contains about 4 million examples. Furthermore, since the Code2Vec model was already trained on this data we reduce the transfer learning needed to adapt the weights between the two models. 
+
+The distributions of '<', '<=', '>' or '<=' (hereafter referred to as \textit{comparators}) and the types of statements containing those comparators in the original dataset can be seen in tables \ref{tab:ComparatorDistribution} and \ref{tab:StatementDistribution}. As can be seen, the distributions of both comparators and statement types is far from uniform with < accounting for over half of the comparators and \textit{if} statements containing a similar share of all comparators. We considered trying to balance the dataset and see what effect that would have on the accuracy of the model but were unable to do so due to time constraints.
+
+\begin{table}[]
+\centering
+\begin{tabular}{l|l|l}
+\toprule
+Comparator    & Count   & Percentage \\ 
+\midrule
+greater       & 755,078  & 27.43\%    \\ 
+greaterEquals & 35,9455  & 13.06\%    \\ 
+less          & 1,389,789 & 50.48\%    \\ 
+lessEquals    & 248,848  & 9.04\%     \\ 
+\bottomrule
+\end{tabular}
+\caption{Distribution of comparators found in the java-large dataset collected by Alon et al.\cite{code2seq}}
+\end{table}
+\label{tab:ComparatorDistribution}
+
+\begin{table}[]
+\centering
+\begin{tabular}{l|l|l}
+\toprule
+Statement Type    & Count   & Percentage \\ 
+\midrule
+If             & 1,399,436 & 50.83\%    \\
+For            & 9,219,48  & 33.49\%    \\
+While          & 104,412  & 3.79\%     \\
+Ternary        & 100,567  & 3.65\%     \\
+Method         & 70,268   & 2.55\%     \\
+Other          & 68,735   & 2.50\%     \\
+\bottomrule
+\end{tabular}
+\caption{Distribution of the type of statements containing comparators found in the java-large dataset collected by Alon et al.\cite{code2seq}}
+\end{table}
+\label{tab:StatementDistribution}
+
+For our training data we need both positive (containing bugs) code and negative code (bug-free), to do this we take the aforementioned dataset and create bugs by performing specially designed mutations. First, we parse the code using Java Parser \footnote{https://javaparser.org/} to generate an AST based on the source code. We then search the AST for methods that might contain the bug in question, generate a negative example by performing the mutation, which will be further explained in the next section. Then we take both the negative and positive examples and send them through the preprocessing pipeline used in \cite{alon2019code2vec} before passing them into our model. This process is described in detail in the next sections.
+
+
+
+\subsection{Mutations}\label{sec:mutations}
+
+To generate our mutations we consider each method and search for any occurrences of comparators. If the method contains a comparator it is extracted from the code for further manipulation, any methods not containing a comparator are ignored. Once we have extracted all methods of interest from the code, the method is parsed for different \textit{context types} that comparators occur in. This is done so that we can account for different sub-types of off-by-one errors and also evaluate if our model is better at detecting bugs in some contexts than others. 
+
+\begin{lstlisting}[caption={An example of a method before mutation. The context type of this comparator is FORless},captionpos=b]
+public void setContents(List<Content> contentsBefore, List<Content> contentsAfter) {
+    for (int i = 0; i < contentsAfter.size(); i++) {
+        Content content = contentsAfter.get(i);
+        if (content instanceof PathContent) {
+            paths.add((PathContent) content);
+        }
+    }
+}
+\end{lstlisting}
+
+We define a context type as the combination of the operator (less, lessEquals, greater or greaterEquals) and the type of statement it occurs in (For loop, If statement, While loop, etc), more specifically this is the class of the operator's parent node in the AST. For a full list of all context types refer to Appendix \ref{appendix:quantitative_evaluation}. For every method, a random comparator is selected, mutated and turned into its respective off-by-one comparator (for example, '<' will be mutated into '<='). Finally both the original and the mutated methods are added to the dataset.
+
+\begin{lstlisting}[caption={An example of a method after mutation. The context type of this comparator is FORlessEqueals},captionpos=b]
+public void setContents(List<Content> contentsBefore, List<Content> contentsAfter) {
+    for (int i = 0; i <= contentsAfter.size(); i++) {
+        Content content = contentsAfter.get(i);
+        if (content instanceof PathContent) {
+            paths.add((PathContent) content);
+        }
+    }
+}
+\end{lstlisting}
+
+
+\subsection{Source code representation} \label{sec:SourceCodeRepresentation}
+After a method has been extracted, it is passed through the same preprocessing pipeline as was used in the original Code2Vec paper \cite{alon2019code2vec}. The source code of each method is again turned into an AST using the modified JavaExtractor from \cite{alon2019code2vec}. We then select at most $200$ paths between $2$ unique terminals in the AST of the method. We encode these terminals into integer tokens using the dictionary used by Code2Vec \cite{alon2019code2vec} and hash the string representation of the paths with Java hashcode method\footnote{\url{https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#hashCode--}}. This means that each method in Java code is turned into a set of at most $200$ integer tuples of the format $(terminal_i, path, terminal_j)$ whereby $i \neq j$ and $path$ is an existing path in the AST between source $terminal_i$ and target $terminal_j$. 
+
+In this paper, we want to apply transfer learning from the original Code2Vec model \cite{alon2019code2vec} to our problem. Allowing us to reuse the pre-trained weights from the original Code2Vec model \cite{alon2019code2vec}. However, we can only do this if our model preprocesses and encodes the source code in the same way as described in the original Code2Vec paper \cite{alon2019code2vec}. That is why our preprocessing code is based on the Java Extractor Jar and dictionaries as published on the repository \footnote{https://github.com/tech-srl/code2vec} of Code2Vec and tailored to our needs.

@@ -1,0 +1,52 @@
+\section{Evaluation} \label{sec:evaluation}
+In this section, we present the results for our quantitative analysis to better understand our model and select the best performing architecture. We also perform a qualitative evaluation with the best performing architecture and compare it to static analyzers.
+\subsection{Quantitative Evaluation} \label{sec:quantitative_analysis}
+Different model architectures were compared with regards to simple metrics such as accuracy, F1 score, precision and recall. Out of the 4 tested architectures, the fine-tuning Code2Vec architecture was selected for further evaluation based on the metrics (see Table \ref{tab:evaluationArchitectures}). This architecture is also used in the qualitative evaluation.
+
+To better understand the model and to analyze the context types in which it performs the best, we broke down the performance of the model by context type (see Table \ref{tab:quantitative_evaluation_bug_types} in Appendix \ref{appendix:quantitative_evaluation}). The test dataset is previously unseen code from the same data-gathering project and mutation method as used to train the model (see Section \ref{sec:data}), hence the distribution of different bug opportunities remains the same.
+
+
+From Table \ref{tab:quantitative_evaluation_bug_types}, it is evident that the precision is correlated with the total amount of data points available for each context type and the types which have the highest number of occurrences also tend to produce a higher F1 score. For example, our model achieves an F1 score of 0.87 when detecting bugs in \textit{for loops}, which are well represented in our dataset. However, our model only achieves an F1 score of 0.52 detecting bugs when \textit{assigning} a boolean value to a variable with a logical condition. A case that is severely underrepresented in the training data.
+
+It is notable that the model can also perform well with off-by-one errors in moderately underrepresented classes such as \textit{return statements} (F1 score of 0.73)  and \textit{while loops} (F1 score of 0.71). This might mean that there was just enough data or the problems were similar enough for the off-by-one errors in \textit{if statements} and \textit{for loops} for the model to generalize. The most underrepresented classes like \textit{assigning value} to a variable are noisy and the model was not able to generalize towards those classes.
+
+In order to get more detailed insight, the 12 cases were further divided into 48 (see Table \ref{tab:quantitative_evaluation_all_bugs} in Appendix \ref{appendix:quantitative_evaluation}). A total of 104 958 data points (Java methods) were created for testing. Each data point contains a method with a comparator and a possibility for an off-by-one error. The names in the first column of Table \ref{tab:quantitative_evaluation_all_bugs} indicate the class of the off-by-one error (for example \textit{FOR} stands for \textit{for loop}) and the comparator indicates which comparator was passed to the model (for example \textit{less} stands for <). The comparator can be from the original code (hence likely correct), but it may also be introduced by a mutation (hence likely incorrect). Hence \textit{FORless} is a method containing a \textit{for loop} with a \textit{<} operator which could have been mutated or not. We can then compare the model output with the truth.
+
+The data points were passed into the model which gave a prediction for the data point to be a bug (true) or not a bug (false). The detailed analysis shows that the classical \textit{FOR} loop (with < operator) scores are significantly higher than others (86-89\% accuracy). This might be due to for loops with comparators such as \textit{(int i = 0; i < number; i++) } being considered as a boilerplate in Java code.
+
+It can also be seen that the model is biased towards predicting \textit{<=} in a for a loop as a bug and \textit{<} not as a bug. This can be explained by the balance of the training set where the majority of the for loops contain a \textit{<} operator. Hence model learns to classify our mutated code with \textit{<=} operator as faulty.
+
+The results with \textit{if conditions} seemed fascinating from Table \ref{tab:quantitative_evaluation_all_bugs} because there is not a default structure as there is with \textit{for loops} and knowledge of the context is needed to make a prediction. Hence we trained a model specifically with mutations in \textit{if conditions} to see how it will perform on the test data.
+
+The results of this specific model can be seen in Table \ref{tab:quantitative_if_evaluation} in Appendix \ref{appendix:quantitative_evaluation}. Interestingly, the results are not better than the model trained with all mutations and the model performs worse when judging \textit{if statements} that contain a \textit{>} operator (F1 score 0.63 vs 0.34). One possible reason for this might be that the model can generalize the relationship better with more data, independent of the contexts like \textit{if conditions} or \textit{for loops}.
+
+\subsection{Qualitative Evaluation}
+While running our model to find bugs on Apache Tomcat\footnote{\url{https://github.com/apache/tomcat}}, Apache Ant\footnote{\url{https://github.com/apache/ant}} and Apache Druid\footnote{\url{https://github.com/apache/incubator-druid}} projects, we were not able to find bugs that broke functionality, but problems that were related to code quality or false positives  (see table \ref{tab:manualEvaluationTable1} in appendix \ref{appendix:qualitative_evaluation}). This also correlates with the results of Ayewah et al. \cite{ayewah2010google} who found that most important bugs in production code are already fixed with expensive methods such as manual testing or user feedback. A much more realistic use-case for such tools is in the developing stage, where the benefit is the largest \cite{johnson2013don}. Hence we analyze code snippets concerned with off-by-one errors and highlight the situations in which the model succeeds over static analyzers and the situations it does not. 
+
+We used 3 different static analyzers as a baseline for our evaluation. \textbf{SpotBugs} (v.4.0.0-beta1)\footnote{SpotBugs official GitHub page: \url{https://github.com/spotbugs/spotbugs}}, formerly known as FindBugs\cite{hovemeyer2004finding}, is an open-source static code analyzer for Java. It analyzes Java bytecode for occurrences of different patterns that are likely containing a bug. At the time of writing this report, SpotBugs is able to identify over 400 of such patterns\footnote{\url{https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html}}, out of which 6 are relevant for this report (see table \ref{tab:patternsUsed}).
+
+\begin{table*}[!htpb]
+\begin{tabular}{@{}lll@{}}
+ 
+\toprule
+\multicolumn{1}{c}{Tool} & \multicolumn{1}{c}{\begin{tabular}[c]{@{}c@{}}Pattern\\ Code\end{tabular}} & \multicolumn{1}{c}{Meaning} \\ \midrule
+\multicolumn{1}{|c|}{\textbf{PVS-Studio}} & \multicolumn{1}{l|}{V6003} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}The analyzer has detected a potential error \\ in a construct consisting of conditional statements.\end{tabular}} \\ \midrule
+\multicolumn{1}{l|}{} & \multicolumn{1}{l|}{V6025} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}When indexing into a variable of type 'array', 'list', \\ or 'string', an 'IndexOutOfBoundsException' exception \\ may be thrown if the index value is outbound the valid range. \\ The analyzer can detect some of such errors.\end{tabular}} \\ \midrule
+\multicolumn{1}{|c|}{\textbf{SpotBugs}} & \multicolumn{1}{l|}{IL\_INFINITE\_LOOP} & \multicolumn{1}{l|}{An apparent infinite loop} \\ \midrule
+\multicolumn{1}{l|}{} & \multicolumn{1}{l|}{RpC\_REPEATED\_CONDITIONAL\_TEST} & \multicolumn{1}{l|}{Repeated conditional tests} \\ \cmidrule(l){2-3} 
+\multicolumn{1}{l|}{} & \multicolumn{1}{l|}{RANGE\_ARRAY\_INDEX} & \multicolumn{1}{l|}{Array index is out of bounds} \\ \cmidrule(l){2-3} 
+\multicolumn{1}{l|}{} & \multicolumn{1}{l|}{RANGE\_ARRAY\_OFFSET} & \multicolumn{1}{l|}{Array offset is out of bounds} \\ \cmidrule(l){2-3} 
+\multicolumn{1}{l|}{} & \multicolumn{1}{l|}{RANGE\_ARRAY\_LENGTH} & \multicolumn{1}{l|}{Array length is out of bounds} \\ \cmidrule(l){2-3} 
+\multicolumn{1}{l|}{} & \multicolumn{1}{l|}{RANGE\_STRING\_INDEX} & \multicolumn{1}{l|}{String index is out of bounds} \\ \bottomrule
+\end{tabular}
+\caption{Static analysis tools and their specific patterns used for comparison.}
+\label{tab:patternsUsed}
+\end{table*}
+
+Secondly, we used \textbf{PVS-Studio} (v.7.04.34029)\footnote{PVS-Studio official home page: \url{https://www.viva64.com/en/pvs-studio/}} which is a proprietary static code analysis tool for programs written in C, C++, C\# and Java. It is aimed to be run right after the code has been modified to detect bugs in the early stage of developing process\footnote{\url{https://www.viva64.com/en/t/0046/}}. Out of 75 possible patterns for Java code analysis\footnote{PVS-Studio Java patterns: \url{https://www.viva64.com/en/w/#GeneralAnalysisJAVA}}, 2 were suitable for our evaluation which are listed in table \ref{tab:patternsUsed}. Thirdly, we used the static analyzer integrated into \textbf{IntelliJ IDEA} Ultimate\footnote{\url{https://www.jetbrains.com/idea/}} (v. 2019.2.3).
+
+The results show that the static analyzer of IntelliJ and SpotBugs are not able to detect off-by-one errors even if the size of the iterated array is explicitly stated. It is possible to observe this in the first example of table \ref{tab:manualEvaluationTable1},  where our model and PVS-Studio are able to detect the issue.
+
+However, from the same table, it can be seen, that our model has learned to identify \textit{<=} operator in for loops as a bug which confirms the results of quantitative analysis in Section \ref{sec:quantitative_analysis}. This was also the case when applying the model to GitHub projects. This could be considered as a styling issue as it is considered a best practice to loop with a \textit{<} comparator.
+
+It can be also be seen, that the false positives with \textit{<=} do not affect other bugs, such as code analyzed in Table  \ref{tab:manualEvaluationTable2} example 2. In the example, the \textit{<=} operator is replaced with \textit{<} by mistake. Our model reports it as a bug while none of the static analyzers are able to detect this mistake. This is a case where our model outperforms static analyzers. 
