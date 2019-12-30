@@ -30,9 +30,9 @@ with a layer for bug detection. More specifically, we train the new model to det
 * Make sure this is the trainable model.   
 * Unzip this folder in the `resources` folder in project root.  
 * Download & unzip [custom_model.zip](https://drive.google.com/drive/folders/1HMOsX_Kkk3kYZETyHL5VxsubLfbT4RzH) to `resources/models`  
-* Run `ExtractWeightRealCode2Vec.py`. This scripts extrat the weights from the original model   
-and transforms them into weights for a `Code2VecCustomModel`.  
-* The custom model can now be used in the any tf graph.   
+<!--* Run `ExtractWeightRealCode2Vec.py`. This scripts extrat the weights from the original model   
+and transforms them into weights for a `Code2VecCustomModel`.-->
+* Run main.py. The custom model can now be used in any tf graph. 
   
  ## Running the model on a single java file
  Assuming you have setup the anaconda environment, you have downloaded the pre trained model and stored it at `resources/models/custom3/model` and you have a java file named `Input.java`. Then you can run the model using the following comand:
