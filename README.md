@@ -1,13 +1,32 @@
 
-# Using Distributed Representation of Code for Bug Detection :blue_book:  
+# Learning Mistakes in Boundary Conditions: A First Exploration
   
 ## Description: :newspaper:  
-The aim of this project is to use [Code2Vec](www.code2vec.org) model and replace the final layer used for method naming 
-with a layer for bug detection. More specifically, we train the new model to detect 
-[off-by-one](https://en.wikipedia.org/wiki/Off-by-one_error) errors.   
-* Report:  [PDF](LaTeX/report_briem_smit_sellik_rapoport.pdf) / [LaTeX](LaTeX)
-* Poster:  https://pubsecure.lucidpress.com/cd8dd2b3-6e3b-4606-b1fe-6fd172dc9238/#EyrcOno3xlfW
-* Slides:  https://docs.google.com/presentation/d/1_uJpnyXuuapQrl4I2mJ6oLryUvFtDyOYmDBDlhd7aJo/edit?usp=sharing
+
+Mistakes in boundary conditions are the cause of many bugs in software. 
+These mistakes happen when, e.g., 
+developers make use of '<' or '>' in cases where they should have used '<=' or '>='. 
+Mistakes in boundary conditions are often hard to find and manually detecting
+them might be very time-consuming for developers.
+
+And while our community has been proposing (manual) techniques to cope with
+mistakes in the boundaries for a long time, the automated detection of
+such bugs still remains a challenge. As we show in this paper,
+the state-of-the-practice static analysis tools are not able to detect
+such bugs.
+We conjecture that, for a tool to be able to precisely identify mistakes in boundary conditions, it should be able
+to capture the overall context of the source code under analysis. 
+
+In this work, we propose an initial exploring on NLP-based deep learning models that 
+learn mistakes in boundary conditions and, later, are able to identify them in unseen code snippets. 
+We train and test a model on over 1.5 million code snippets, with and without mistakes in different boundary conditions.
+Our model shows an accuracy from 55\% up to 87\%. In the 41 real-world bugs we manually investigated, 
+our model shows a more modest accuracy; however, the existing state-of-the-practice linter tools were
+able to detect any of the bugs.
+
+We hope this paper can pave the road towards deep learning models that will be able to support developers
+in detecting mistakes in boundary conditions.
+
   
 ## Data Collection: :floppy_disk:  
 * Raw Java large dataset was used from [Code2Seq](https://github.com/tech-srl/code2seq#datasets)    
